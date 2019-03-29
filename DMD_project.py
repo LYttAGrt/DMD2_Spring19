@@ -109,13 +109,17 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
         }).run(conn)
 
     # Administrators generator
+    admins_types=['Dean of the Hospital', 'Hospital Administrator', 'Head of Surgeons and Doctors Department',
+                  'Head of Nursing Department', 'Head of Emergency Department', 'Head of Recruitment Department',
+                  'Head of Medicine Department', 'Head of Equipment Department', 'Head of Security Department',
+                  'Medical Student Administration', 'Inventory Head']
     for i in range(0, int(0.15 * total_employees_amount), 1):
         r.table('Administrators').insert({
             'administrator_id': i,
             'name': gen_person.full_name(gender=Gender.FEMALE),
             'date_of_birth': str(date.date(start=1970, end=1990)),
             'sex': 'male',
-            'qualification': 'intern',
+            'qualification': admins_types[randint(0, len(admins_types) - 1)],
             'SSN_ID': ssn_id.between(minimum=1000000000000000, maximum=10000000000000000 - 1),
             'telephone': ssn_id.between(minimum=89000000000, maximum=89999999999),
             'home_address': home_addr.address(),
