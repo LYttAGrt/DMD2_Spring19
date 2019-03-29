@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>undefined</title>
+  <meta name="generator" content="Google Web Designer 5.0.4.0226">
+  <style type="text/css" id="gwd-text-style">
+    p {
+      margin: 0px;
+    }
+    h1 {
+      margin: 0px;
+    }
+    h2 {
+      margin: 0px;
+    }
+    h3 {
+      margin: 0px;
+    }
+  </style>
+  <style type="text/css">
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0px;
+    }
+    body {
+      background-color: transparent;
+      transform: perspective(1400px) matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+      transform-style: preserve-3d;
+    }
+    .gwd-select-9wqz {
+      position: absolute;
+      width: 100px;
+      height: 24px;
+      left: 189px;
+      top: 13px;
+    }
+    .gwd-select-1xtu {
+      width: 77px;
+      transform-origin: 38.5009px 11.9892px 0px;
+      left: 134px;
+    }
+    .gwd-select-1n3l {
+      border-style: solid;
+      width: 77px;
+      transform-origin: 38.5px 11.9892px 0px;
+      top: 13px;
+      left: 57px;
+    }
+    .gwd-button-ba21 {
+      position: absolute;
+      width: 100px;
+      height: 24px;
+      left: 185.007px;
+      top: 178px;
+    }
+    .gwd-select-1etr {
+      left: 212px;
+      width: 73px;
+      transform-origin: 36.5021px 11.9892px 0px;
+    }
+  </style>
+  <script type="text/javascript" gwd-events="support" src="gwd-events-support.1.0.js"></script>
+  <script type="text/javascript" gwd-events="handlers">
+    window.gwd = window.gwd || {};
+    gwd.hello = function(event) {
+      print(Hello);
+    };
+    gwd.change = function(event) {
+      table.addEventListener('change', addOption());
+ addOption() {
+   if (table.value == "Patients") {
+   alert("Hi");
+   }
+ }
+    }      
+        test.options[test.options.length] = new Option("Test2", "Test2");
+      }
+    };
+  </script>
+  <script type="text/javascript" gwd-events="registration">
+    // Код для обработки событий в Google Web Designer
+     // Этот блок скрипта создается автоматически, не изменяйте его.
+    gwd.actions.events.registerEventHandlers = function(event) {
+      gwd.actions.events.addHandler('operation', 'click', gwd.hello, false);
+      gwd.actions.events.addHandler('submit', 'click', gwd.send, false);
+      gwd.actions.events.addHandler('submit', 'click', gwd.send, false);
+      gwd.actions.events.addHandler('submit', 'click', gwd.send, false);
+      gwd.actions.events.addHandler('submit', 'click', gwd.send, false);
+      gwd.actions.events.addHandler('submit', 'click', gwd.send, false);
+      gwd.actions.events.addHandler('test', 'change', gwd.change, false);
+      gwd.actions.events.addHandler('test', 'change', gwd.change, false);
+      gwd.actions.events.addHandler('test', 'change', gwd.change, false);
+      gwd.actions.events.addHandler('test', 'change', gwd.change, false);
+      gwd.actions.events.addHandler('submit', 'click', gwd.change, false);
+    };
+    gwd.actions.events.deregisterEventHandlers = function(event) {
+      gwd.actions.events.removeHandler('operation', 'click', gwd.hello, false);
+      gwd.actions.events.removeHandler('submit', 'click', gwd.send, false);
+      gwd.actions.events.removeHandler('submit', 'click', gwd.send, false);
+      gwd.actions.events.removeHandler('submit', 'click', gwd.send, false);
+      gwd.actions.events.removeHandler('submit', 'click', gwd.send, false);
+      gwd.actions.events.removeHandler('submit', 'click', gwd.send, false);
+      gwd.actions.events.removeHandler('test', 'change', gwd.change, false);
+      gwd.actions.events.removeHandler('test', 'change', gwd.change, false);
+      gwd.actions.events.removeHandler('test', 'change', gwd.change, false);
+      gwd.actions.events.removeHandler('test', 'change', gwd.change, false);
+      gwd.actions.events.removeHandler('submit', 'click', gwd.change, false);
+    };
+    document.addEventListener("DOMContentLoaded", gwd.actions.events.registerEventHandlers);
+    document.addEventListener("unload", gwd.actions.events.deregisterEventHandlers);
+  </script>
+</head>
+
+<body class="htmlNoPages">
+  <select id="test" class="gwd-select-9wqz gwd-select-1etr" data-gwd-name="Test">
+    <option value="Test1" selected="">Test1</option>
+  </select>
+  <select id="operation" class="gwd-select-9wqz gwd-select-1n3l" data-gwd-name="Operation">
+    <option value="CREATE" selected="">CREATE</option>
+    <option value="INSERT">INSERT</option>
+    <option value="DELETE">DELETE</option>
+    <option value="UPDATE">UPDATE</option>
+  </select>
+  <select id="table" class="gwd-select-9wqz gwd-select-1xtu" data-gwd-name="Table">
+    <option value="Administrators" selected="">Administrators</option>
+    <option value="Ambulances">Ambulances</option>
+    <option value="Departments">Departments</option>
+    <option value="Doctors">Doctors</option>
+    <option value="Hospital">Hospital</option>
+    <option value="IllnesForms">IllnessForms</option>
+    <option value="IllnessHistories">IllnessHistories</option>
+    <option value="Nurses">Nurses</option>
+    <option value="Paramedics">Paramedics</option>
+    <option value="Patients">Patients</option>
+    <option value="Stuff">Stuff</option>
+  </select>
+  <button id="submit" class="gwd-button-ba21">OK</button>
+</body>
+
+</html>
