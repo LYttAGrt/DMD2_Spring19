@@ -8,6 +8,7 @@ r = RethinkDB()
 
 # TODO for tables who stores coordinate:
 #  since geospatial search is required - maybe use index_create(geo=True). Check RethinkDB docs for details
+# TODO for stories & forms - check uniqueness of pairs [owner, forms]
 
 # ----------------------------------------------------------------------------------------------------------------------
 # part 1: create all tables used. Since all fields of each table should be described - use direct table creation
@@ -44,9 +45,9 @@ def create_all_tables(connection):
 # So, for realism we want 100*Ne employees and 1000*Np patients
 def generate_sample_data(total_employees_amount: int, total_patients_amount: int, conn):
     # first - check arguments
-    if total_employees_amount < 0 or total_employees_amount % 100.0 != 0.0:
+    if total_employees_amount < 0 or total_employees_amount % 10.0 != 0.0:
         return 1
-    if total_patients_amount < 0 or total_patients_amount % 1000.0 != 0.0:
+    if total_patients_amount < 0 or total_patients_amount % 100.0 != 0.0:
         return 1
 
     # mimesis generators will be used because they're really easy. very easy
@@ -171,7 +172,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
         r.table('IllnessHistories').insert({
             'history_id': i,
             'owner_id': i,
-            'data': {},
+            'forms_ids': [],
             'next_id': ''
         }).run(conn)
 
@@ -192,6 +193,8 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
                 'result': 'success'
             }
         }).run(conn)
+        a = r.table('IllnessHistories').get(patient_id)['forms_ids'].append(i).run(conn)
+        r.table('IllnessHistories').filter(r.row['owner_id'] == patient_id).update({'forms_ids': a}).run(conn)
 
     # Hospital generator
     r.table('Hospital').insert({
@@ -264,7 +267,7 @@ def generate_new_data():
     print('All tables set up.')
 
     # point 2: fill up these tables *according to some half-randomized aggregation*
-    generate_sample_data(total_employees_amount=200, total_patients_amount=1000, conn=conn)
+    generate_sample_data(total_employees_amount=20, total_patients_amount=100, conn=conn)
     print('Sample data generated.')
 
     return 0
