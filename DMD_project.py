@@ -140,31 +140,24 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
             'salary': 8800.00
         }).run(conn)
 
-    # Patients generator. Gender division: 0.5 avg
-    for i in range(0, int(0.5 * total_patients_amount)):
+    for i in range(total_patients_amount):
+        coin = randint(0, 1)
+        if coin == 1:
+            gender = Gender.MALE
+        else:
+            gender = Gender.FEMALE
         r.table('Patients').insert({
-            'patient_id': total_employees_amount,
-            'name': gen_person.full_name(gender=Gender.FEMALE),
+            'patient_id': i,
+            'name': gen_person.full_name(gender=gender),
             'date_of_birth': str(date.date(start=1935, end=2015)),
-            'sex': 'male',
+            'sex': str(gender.value),
             'SSN_ID': ssn_id.between(minimum=1000000000000000, maximum=10000000000000000 - 1),
             'telephone': ssn_id.between(minimum=89000000000, maximum=89999999999),
             'home_address': home_addr.address(),
             'coordinates': {float(randint(10000, 300000) / 100), float(randint(10000, 300000) / 100)},
             'illness_history_head_id': i
         }).run(conn)
-    for i in range(int(0.5 * total_patients_amount), int(1.0 * total_patients_amount)):
-        r.table('Patients').insert({
-            'patient_id': total_employees_amount,
-            'name': gen_person.full_name(gender=Gender.FEMALE),
-            'date_of_birth': str(date.date(start=1940, end=2015)),
-            'sex': 'female',
-            'SSN_ID': ssn_id.between(minimum=1000000000000000, maximum=10000000000000000 - 1),
-            'telephone': ssn_id.between(minimum=89000000000, maximum=89999999999),
-            'home_address': home_addr.address(),
-            'coordinates': {float(randint(10000, 300000) / 100), float(randint(10000, 300000) / 100)},
-            'illness_history_head_id': i
-        }).run(conn)
+
 
     # Let's link a little illness histories with their owners.
     # Also, by analogue of extended books, next_ids can be used
@@ -177,6 +170,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
         }).run(conn)
 
     # for this table - maybe generate different types of forms
+
     r.table('IllnessForms').insert({
         'form_id': total_employees_amount,
         'form_type': '069-uf',
@@ -184,6 +178,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
         'patient_id': total_employees_amount,
         'procedure_type': 'operation',
         'additional_information': {
+            # so, form data by itself should be stored here
             'operation_type': 'bone marrow transplant',
             'result': 'success'
         }
