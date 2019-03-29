@@ -61,6 +61,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
     paramedic_amount = int(0.15 * total_employees_amount)
     admins_amount = int(0.15 * total_employees_amount)
     stuff_amount = int(0.10 * total_employees_amount)
+    ambulance_amount = int(0.01 * total_employees_amount)
 
     # add multipliers such as no more than 1 Hospital - partially done
     # add loops - partially done
@@ -80,7 +81,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
             'sex': 'male',
             'qualification ': doctor_types[randint(0, len(doctor_types) - 1)],
             'SSN_ID': ssn_id.between(minimum=1000000000000000, maximum=10000000000000000 - 1),
-            'telephone': 'blue',
+            'telephone': ssn_id.between(minimum=89000000000, maximum=89999999999),
             'home_address': home_addr.address(),
             'salary': 12000.00
         }).run(conn)
@@ -175,12 +176,14 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
         }).run(conn)
 
     # for this table - maybe generate different types of forms
+    form_types=['069-uf', '322-es', '183-op', '013-dt']
     for i in range(3 * total_patients_amount):
+        patient_id = randint(0, total_patients_amount - 1)
         r.table('IllnessForms').insert({
-            'form_id': total_employees_amount,
-            'form_type': '069-uf',
-            'doctor_id': randint(),
-            'patient_id': total_employees_amount,
+            'form_id': i,
+            'form_type': form_types[randint(0, len(form_types) - 1)],
+            'doctor_id': randint(0, doctors_amount - 1),
+            'patient_id': patient_id,
             'procedure_type': 'operation',
             'additional_information': {
                 # so, form data by itself should be stored here
@@ -212,7 +215,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
         }).run(conn)
 
     # Ambulance generator
-    for i in range(int(0.01 * total_employees_amount)):
+    for i in range(ambulance_amount):
         r.table('Ambulances').insert({
             'ambulance_id': i,
             'driver_id': 'wanted',
