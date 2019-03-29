@@ -122,7 +122,7 @@ def generate_sample_data(total_employees_amount: int, conn):
                 'name': gen_person.full_name(gender=Gender.FEMALE),
                 'date_of_birth': date.date(start=1950, end=2000),
                 'sex': 'female',
-                'vacated_position': stuff_jobs[randint(0, len(randint)-1)],
+                'vacated_position': stuff_jobs[randint(0, len(stuff_jobs)-1)],
                 'SSN_ID': ssn_id.between(minimum=1000000000000000, maximum=10000000000000000 - 1),
                 'telephone': ssn_id.between(minimum=89000000000, maximum=89999999999),
                 'home_address': home_addr.address(),
