@@ -56,6 +56,11 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
     ssn_id = mimesis.Numbers()
     home_addr = mimesis.Address()
     stuff_jobs = ['janitor', 'cook', 'guard']
+    doctors_amount = int(0.25 * total_employees_amount)
+    nurses_amount = int(0.35 * total_employees_amount)
+    paramedic_amount = int(0.15 * total_employees_amount)
+    admins_amount = int(0.15 * total_employees_amount)
+    stuff_amount = int(0.10 * total_employees_amount)
 
     # add multipliers such as no more than 1 Hospital - partially done
     # add loops - partially done
@@ -67,7 +72,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
                     'Obstetrics and gynaecology', 'Orthopedic surgery', 'Ophthalmology', 'Otorhinolaryngology',
                     'Pediatric surgery', 'Podiatric_surgery', 'Plastic surgery', 'Surgical oncology',
                     'Trauma surgery', 'Thoracic surgery', 'Urology', 'General Surgery']
-    for i in range(0, int(0.25 * total_employees_amount), 1):
+    for i in range(doctors_amount):
         r.table('Doctors').insert({
             'doctor_id': i,
             'name': gen_person.full_name(gender=Gender.MALE),
@@ -81,7 +86,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
         }).run(conn)
 
     # Nurses generator
-    for i in range(0, int(0.35 * total_employees_amount), 1):
+    for i in range(nurses_amount):
         r.table('Nurses').insert({
             'nurse_id': i,
             'name': gen_person.full_name(gender=Gender.FEMALE),
@@ -95,7 +100,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
         }).run(conn)
 
     # Paramedics generator
-    for i in range(0, int(0.15 * total_employees_amount), 1):
+    for i in range(paramedic_amount):
         r.table('Paramedics').insert({
             'paramedic_id': i,
             'name': gen_person.full_name(gender=Gender.MALE),
@@ -113,7 +118,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
                   'Head of Nursing Department', 'Head of Emergency Department', 'Head of Recruitment Department',
                   'Head of Medicine Department', 'Head of Equipment Department', 'Head of Security Department',
                   'Medical Student Administration', 'Inventory Head']
-    for i in range(0, int(0.15 * total_employees_amount), 1):
+    for i in range(admins_amount):
         r.table('Administrators').insert({
             'administrator_id': i,
             'name': gen_person.full_name(gender=Gender.FEMALE),
@@ -127,7 +132,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
         }).run(conn)
 
     # Stuff generator
-    for i in range(0, int(0.10 * total_employees_amount), 1):
+    for i in range(stuff_amount):
         r.table('Stuff').insert({
             'stuff_id': i,
             'name': gen_person.full_name(gender=Gender.FEMALE),
@@ -161,7 +166,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
 
     # Let's link a little illness histories with their owners.
     # Also, by analogue of extended books, next_ids can be used
-    for i in range(int(1.5 * total_employees_amount)):
+    for i in range(total_patients_amount):
         r.table('IllnessHistories').insert({
             'history_id': i,
             'owner_id': i,
@@ -170,19 +175,19 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
         }).run(conn)
 
     # for this table - maybe generate different types of forms
-
-    r.table('IllnessForms').insert({
-        'form_id': total_employees_amount,
-        'form_type': '069-uf',
-        'doctor_id': total_employees_amount,
-        'patient_id': total_employees_amount,
-        'procedure_type': 'operation',
-        'additional_information': {
-            # so, form data by itself should be stored here
-            'operation_type': 'bone marrow transplant',
-            'result': 'success'
-        }
-    }).run(conn)
+    for i in range(3 * total_patients_amount):
+        r.table('IllnessForms').insert({
+            'form_id': total_employees_amount,
+            'form_type': '069-uf',
+            'doctor_id': randint(),
+            'patient_id': total_employees_amount,
+            'procedure_type': 'operation',
+            'additional_information': {
+                # so, form data by itself should be stored here
+                'operation_type': 'bone marrow transplant',
+                'result': 'success'
+            }
+        }).run(conn)
 
     # Hospital generator
     r.table('Hospital').insert({
