@@ -9,9 +9,6 @@ r = RethinkDB()
 # TODO for tables who stores coordinate:
 #  since geospatial search is required - maybe use index_create(geo=True). Check RethinkDB docs for details
 
-r = RethinkDB()
-
-
 # ----------------------------------------------------------------------------------------------------------------------
 # part 1: create all tables used. Since all fields of each table should be described - use direct table creation
 def create_all_tables(connection):
