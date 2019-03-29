@@ -179,15 +179,16 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
     form_types=['069-uf', '322-es', '183-op', '013-dt']
     for i in range(3 * total_patients_amount):
         patient_id = randint(0, total_patients_amount - 1)
+        procedure_types = ['bone removing', 'bone updating', 'bone inserting', 'bone growing']
         r.table('IllnessForms').insert({
             'form_id': i,
             'form_type': form_types[randint(0, len(form_types) - 1)],
             'doctor_id': randint(0, doctors_amount - 1),
             'patient_id': patient_id,
-            'procedure_type': 'operation',
+            'procedure_type': procedure_types[randint(0, len(procedure_types) -1)],
             'additional_information': {
                 # so, form data by itself should be stored here
-                'operation_type': 'bone marrow transplant',
+                'operation_type': '',
                 'result': 'success'
             }
         }).run(conn)
