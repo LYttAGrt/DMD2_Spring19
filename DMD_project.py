@@ -1,8 +1,10 @@
-import rethinkdb as r
+from rethinkdb import RethinkDB
 # import os
 from random import randint
 import mimesis
 from mimesis.enums import Gender
+
+r = RethinkDB()
 
 # TODO for tables who stores coordinate:
 #  since geospatial search is required - maybe use index_create(geo=True). Check RethinkDB docs for details
@@ -70,7 +72,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
         r.table('Doctors').insert({
             'doctor_id': i,
             'name': gen_person.full_name(gender=Gender.MALE),
-            'date_of_birth': date.date(start=1950, end=1995),
+            'date_of_birth': str(date.date(start=1950, end=1995)),
             'sex': 'male',
             'qualification ': doctor_types[randint(0, len(doctor_types) - 1)],
             'SSN_ID': ssn_id.between(minimum=1000000000000000, maximum=10000000000000000 - 1),
@@ -84,7 +86,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
         r.table('Nurses').insert({
             'nurse_id': i,
             'name': gen_person.full_name(gender=Gender.FEMALE),
-            'date_of_birth': date.date(start=1950, end=1997),
+            'date_of_birth': str(date.date(start=1950, end=1997)),
             'sex': 'female',
             'qualification': 'nurse',
             'SSN_ID': ssn_id.between(minimum=1000000000000000, maximum=10000000000000000 - 1),
@@ -98,7 +100,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
         r.table('Paramedics').insert({
             'paramedic_id': i,
             'name': gen_person.full_name(gender=Gender.MALE),
-            'date_of_birth': date.date(start=1980, end=2000),
+            'date_of_birth': str(date.date(start=1980, end=2000)),
             'sex': 'male',
             'qualification': 'ambulance paramedic',
             'SSN_ID': ssn_id.between(minimum=1000000000000000, maximum=10000000000000000 - 1),
@@ -112,7 +114,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
         r.table('Administrators').insert({
             'administrator_id': i,
             'name': gen_person.full_name(gender=Gender.FEMALE),
-            'date_of_birth': date.date(start=1970, end=1990),
+            'date_of_birth': str(date.date(start=1970, end=1990)),
             'sex': 'male',
             'qualification': 'intern',
             'SSN_ID': ssn_id.between(minimum=1000000000000000, maximum=10000000000000000 - 1),
@@ -126,7 +128,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
         r.table('Stuff').insert({
             'stuff_id': i,
             'name': gen_person.full_name(gender=Gender.FEMALE),
-            'date_of_birth': date.date(start=1950, end=2000),
+            'date_of_birth': str(date.date(start=1950, end=2000)),
             'sex': 'female',
             'vacated_position': stuff_jobs[randint(0, len(stuff_jobs) - 1)],
             'SSN_ID': ssn_id.between(minimum=1000000000000000, maximum=10000000000000000 - 1),
@@ -140,7 +142,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
         r.table('Patients').insert({
             'patient_id': total_employees_amount,
             'name': gen_person.full_name(gender=Gender.FEMALE),
-            'date_of_birth': date.date(start=1935, end=2015),
+            'date_of_birth': str(date.date(start=1935, end=2015)),
             'sex': 'male',
             'SSN_ID': ssn_id.between(minimum=1000000000000000, maximum=10000000000000000 - 1),
             'telephone': ssn_id.between(minimum=89000000000, maximum=89999999999),
@@ -152,7 +154,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
         r.table('Patients').insert({
             'patient_id': total_employees_amount,
             'name': gen_person.full_name(gender=Gender.FEMALE),
-            'date_of_birth': date.date(start=1940, end=2015),
+            'date_of_birth': str(date.date(start=1940, end=2015)),
             'sex': 'female',
             'SSN_ID': ssn_id.between(minimum=1000000000000000, maximum=10000000000000000 - 1),
             'telephone': ssn_id.between(minimum=89000000000, maximum=89999999999),
@@ -262,3 +264,5 @@ def generate_new_data():
 
 
 generate_new_data()
+
+
