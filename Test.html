@@ -106,6 +106,31 @@
 </head>
 
 <body class="htmlNoPages">
+  <script>
+    // import rethinkdb
+    var r = require("rethinkdb");
+    // connect to it
+    var conn = null;
+    r.connect({host: 'localhost', port: 8080}, function (err, connection) {
+      if(err) throw err;
+      conn = connection;
+    });
+
+    // define auto-filler for "table" selector
+    function fillTableSelector(conn) {
+      var tableList = r.db('HMS').tableList().run(conn, function (err, res) {
+        if (err) throw err;
+      });
+
+      let ret = "";
+      tableList.forEach(function (tableName, index) {
+        ret += "<option value " + tableName + ">" + tableName + "</option>";
+      });
+      document.getElementById("table").innerHTML = ret;
+    }
+
+  </script>
+
   <select id="test" class="gwd-select-9wqz gwd-select-1etr" data-gwd-name="Test">
     <option value="Test1" selected="">Test1</option>
   </select>
