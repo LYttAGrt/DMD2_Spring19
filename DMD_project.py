@@ -142,7 +142,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
             'SSN_ID': ssn_id.between(minimum=1000000000000000, maximum=10000000000000000 - 1),
             'telephone': ssn_id.between(minimum=89000000000, maximum=89999999999),
             'home_address': home_addr.address(),
-            'salary': 8800.00
+            'salary': 8800.001
         }).run(conn)
 
     for i in range(total_patients_amount):

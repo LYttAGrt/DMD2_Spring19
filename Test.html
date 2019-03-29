@@ -70,44 +70,35 @@
     };
     gwd.change = function(event) {
       table.addEventListener('change', addOption());
- addOption() {
-   if (table.value == "Patients") {
-   alert("Hi");
-   }
- }
-    }      
-        test.options[test.options.length] = new Option("Test2", "Test2");
+
+      function addOption() {
+        if (table.value == "Patients") {
+          alert("Hi");
+          test.options[test.options.length] = new Option("Test2", "Test2");
+        }
       }
-    };
+    }
   </script>
   <script type="text/javascript" gwd-events="registration">
     // Код для обработки событий в Google Web Designer
      // Этот блок скрипта создается автоматически, не изменяйте его.
     gwd.actions.events.registerEventHandlers = function(event) {
       gwd.actions.events.addHandler('operation', 'click', gwd.hello, false);
-      gwd.actions.events.addHandler('submit', 'click', gwd.send, false);
-      gwd.actions.events.addHandler('submit', 'click', gwd.send, false);
-      gwd.actions.events.addHandler('submit', 'click', gwd.send, false);
-      gwd.actions.events.addHandler('submit', 'click', gwd.send, false);
-      gwd.actions.events.addHandler('submit', 'click', gwd.send, false);
       gwd.actions.events.addHandler('test', 'change', gwd.change, false);
       gwd.actions.events.addHandler('test', 'change', gwd.change, false);
       gwd.actions.events.addHandler('test', 'change', gwd.change, false);
       gwd.actions.events.addHandler('test', 'change', gwd.change, false);
       gwd.actions.events.addHandler('submit', 'click', gwd.change, false);
+      gwd.actions.events.addHandler('test', 'change', gwd.change, false);
     };
     gwd.actions.events.deregisterEventHandlers = function(event) {
       gwd.actions.events.removeHandler('operation', 'click', gwd.hello, false);
-      gwd.actions.events.removeHandler('submit', 'click', gwd.send, false);
-      gwd.actions.events.removeHandler('submit', 'click', gwd.send, false);
-      gwd.actions.events.removeHandler('submit', 'click', gwd.send, false);
-      gwd.actions.events.removeHandler('submit', 'click', gwd.send, false);
-      gwd.actions.events.removeHandler('submit', 'click', gwd.send, false);
       gwd.actions.events.removeHandler('test', 'change', gwd.change, false);
       gwd.actions.events.removeHandler('test', 'change', gwd.change, false);
       gwd.actions.events.removeHandler('test', 'change', gwd.change, false);
       gwd.actions.events.removeHandler('test', 'change', gwd.change, false);
       gwd.actions.events.removeHandler('submit', 'click', gwd.change, false);
+      gwd.actions.events.removeHandler('test', 'change', gwd.change, false);
     };
     document.addEventListener("DOMContentLoaded", gwd.actions.events.registerEventHandlers);
     document.addEventListener("unload", gwd.actions.events.deregisterEventHandlers);
