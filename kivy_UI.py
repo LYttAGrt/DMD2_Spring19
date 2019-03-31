@@ -17,6 +17,7 @@ from kivy.uix.textinput import TextInput
 # check version is correct
 kivy.require('1.10.1')
 
+# TODO use set_hint_value to nicely set field names to the UI after Spinner value is changed
 
 class MainActivity(App):
     # Set up connection in the very beginning, cache some useful data
