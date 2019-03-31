@@ -6,6 +6,7 @@ from mimesis.enums import Gender
 
 r = RethinkDB()
 
+
 # TODO for tables who stores coordinate:
 #  since geospatial search is required - maybe use index_create(geo=True). Check RethinkDB docs for details
 # TODO for stories & forms - check uniqueness of pairs [owner, forms]
@@ -18,7 +19,7 @@ def create_all_tables(connection):
     # id as PK, name, date_of_birth, sex, qualification, SSN_ID, telephone, home_address, salary
     r.table_create('Nurses', primary_key='nurse_id').run(connection)
     # id as PK, name, date_of_birth, sex, qualification, SSN_ID, telephone, home_address, salary
-    r.table_create('Paramedics', primary_key='nurse_id').run(connection)
+    r.table_create('Paramedics', primary_key='paramedic_id').run(connection)
     # id as PK, name, date_of_birth, sex, qualification, SSN_ID, telephone, home_address, salary
     r.table_create('Administrators', primary_key='administrator_id').run(connection)
     # id as PK, name, date_of_birth, sex, vacated position, SSN_ID, telephone, home_address, salary
@@ -33,11 +34,11 @@ def create_all_tables(connection):
     r.table_create('IllnessForms', primary_key='form_id').run(connection)
 
     # id as PK==0, address, coords, director, list of departments
-    r.table_create('Hospital').run(connection)
+    r.table_create('Hospital', primary_key='hospital_id').run(connection)
     # id as PK, name, id_of_leader, ids_of_doctors, ids_of_nurses, ids_of_admins, ids_of_stuff, maybe # beds
-    r.table_create('Departments').run(connection)
+    r.table_create('Departments', primary_key='department_id').run(connection)
     # id as PK, driver_id, doctor_id, list of paramedic_id, coords
-    r.table_create('Ambulances').run(connection)
+    r.table_create('Ambulances', primary_key='ambulance_id').run(connection)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -62,7 +63,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
     paramedic_amount = int(0.15 * total_employees_amount)
     admins_amount = int(0.15 * total_employees_amount)
     stuff_amount = int(0.10 * total_employees_amount)
-    ambulance_amount = int(0.01 * total_employees_amount)
+    ambulance_amount = int(0.01 * total_employees_amount) + 1
 
     # add multipliers such as no more than 1 Hospital - partially done
     # add loops - partially done
@@ -116,10 +117,10 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
         }).run(conn)
 
     # Administrators generator
-    admins_types=['Dean of the Hospital', 'Hospital Administrator', 'Head of Surgeons and Doctors Department',
-                  'Head of Nursing Department', 'Head of Emergency Department', 'Head of Recruitment Department',
-                  'Head of Medicine Department', 'Head of Equipment Department', 'Head of Security Department',
-                  'Medical Student Administration', 'Inventory Head']
+    admins_types = ['Dean of the Hospital', 'Hospital Administrator', 'Head of Surgeons and Doctors Department',
+                    'Head of Nursing Department', 'Head of Emergency Department', 'Head of Recruitment Department',
+                    'Head of Medicine Department', 'Head of Equipment Department', 'Head of Security Department',
+                    'Medical Student Administration', 'Inventory Head']
     for i in range(admins_amount):
         r.table('Administrators').insert({
             'administrator_id': i,
@@ -165,7 +166,6 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
             'illness_history_head_id': i
         }).run(conn)
 
-
     # Let's link a little illness histories with their owners.
     # Also, by analogue of extended books, next_ids can be used
     for i in range(total_patients_amount):
@@ -177,7 +177,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
         }).run(conn)
 
     # for this table - maybe generate different types of forms
-    form_types=['069-uf', '322-es', '183-op', '013-dt']
+    form_types = ['069-uf', '322-es', '183-op', '013-dt']
     for i in range(3 * total_patients_amount):
         patient_id = randint(0, total_patients_amount - 1)
         procedure_types = ['bone removing', 'bone updating', 'bone inserting', 'bone growing']
@@ -186,7 +186,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
             'form_type': form_types[randint(0, len(form_types) - 1)],
             'doctor_id': randint(0, doctors_amount - 1),
             'patient_id': patient_id,
-            'procedure_type': procedure_types[randint(0, len(procedure_types) -1)],
+            'procedure_type': procedure_types[randint(0, len(procedure_types) - 1)],
             'additional_information': {
                 # so, form data by itself should be stored here
                 'operation_type': '',
@@ -274,5 +274,3 @@ def generate_new_data():
 
 
 generate_new_data()
-
-

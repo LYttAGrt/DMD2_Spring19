@@ -1,0 +1,18 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredIdentifiers">
+        <list>
+          <option value="rethinkdb.RethinkDB.table_create" />
+          <option value="rethinkdb.RethinkDB.table" />
+          <option value="rethinkdb.RethinkDB.db_list" />
+          <option value="rethinkdb.RethinkDB.db_drop" />
+          <option value="rethinkdb.RethinkDB.db_create" />
+          <option value="rethinkdb.RethinkDB.row" />
+          <option value="rethinkdb.RethinkDB.db" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
