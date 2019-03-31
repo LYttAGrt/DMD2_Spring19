@@ -5,5 +5,4 @@ HMS, the DMD course project
 
 To use it, install RebirthDB (e.g, from https://github.com/floydkots/rebirthdb)
 
-Then, run your localhost:
-$ rebirthdb
+Then, run your localhost: \n $ rebirthdb
