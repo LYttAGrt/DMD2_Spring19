@@ -5,19 +5,23 @@ from rethinkdb import RethinkDB
 import kivy
 # use it to run app
 from kivy.app import App
-# Layout is responded for drawing the widgets TODO: choose optimal layout
+# Layout is responded for drawing the widgets
 from kivy.uix.boxlayout import BoxLayout
 # these widgets should be just enough
 from kivy.uix.button import Button
 from kivy.uix.spinner import Spinner
 from kivy.uix.textinput import TextInput
-# Builder shall be used to markup all widgets TODO: use it
+
+# Builder shall be used to markup all widgets
 # from kivy.lang import Builder
 
 # check version is correct
 kivy.require('1.10.1')
 
-# TODO use set_hint_value to nicely set field names to the UI after Spinner value is changed
+# TODO: add fool protection s.a. empty fields & usage of _id field
+# TODO: add UPDATE, DELETE ops
+# TODO: use Builder & choose optimal layout
+
 
 class MainActivity(App):
     # Set up connection in the very beginning, cache some useful data
@@ -25,17 +29,27 @@ class MainActivity(App):
     conn = rdb.connect(db='HMS')
     tables = rdb.db('HMS').table_list().run(conn)
 
-    # Returns, what value should be used: F(str, int) -> str
-    def set_hint_value(self, table_spinner_value: str, field_index: int):
-        for table in self.tables:
-            if table_spinner_value == table:
-                indices = self.rdb.db('HMS').table(table).get(0).keys().run(self.conn)
-                return indices[field_index]
-        return "?"
+    # Puts the values that should be used: F(str, int) -> str
+    def set_hint_value(self, instance, x):
+        # get all necessary indices
+        indices = self.rdb.db('HMS').table(self.spinner_table.text).get(0).keys().run(self.conn)
+        # set all hint_texts
+        for i in range(len(indices)):
+            self.list_of_text_inputs[i].hint_text = indices[i]
+            if self.list_of_text_inputs[i].disabled:
+                self.list_of_text_inputs[i].disabled = False
+            try:
+                if str(self.list_of_text_inputs[i].text).index("_id") > 0:
+                    self.list_of_text_inputs[i].text = "Service field"
+                    self.list_of_text_inputs[i].disabled = True
+            except ValueError:
+                continue
+        for i in range(len(indices), len(self.list_of_text_inputs) - 1):
+            self.list_of_text_inputs[i].hint_text = "Not used"
+            self.list_of_text_inputs[i].disabled = True
+        return 0
 
     # Responded for executing after Button is pressed
-    # TODO: add fool protection s.a. empty fields
-    # TODO: add UPDATE, DELETE
     def button_callback(self, instance):
         # Part 0 - form basis for ReQL command. Get all values from TextInputs
         cmd = self.rdb.db('HMS')
@@ -71,7 +85,7 @@ class MainActivity(App):
 
         # Part 4 - put the result
         print(cmd)
-        self.list_of_text_inputs[9].text = cmd # res
+        self.list_of_text_inputs[9].text = cmd  # res
         return 0
 
     def build(self):
@@ -85,6 +99,7 @@ class MainActivity(App):
         self.spinner_table = Spinner(text='Choose table',
                                      values=tuple(self.rdb.db('HMS').table_list().run(self.conn)),
                                      size=(50, 20))
+        self.spinner_table.bind(text=self.set_hint_value)
 
         # Also we'll need 9 text fields, whose value depends on Table_Selector.value, plus result shower
         self.list_of_text_inputs = [TextInput(hint_text=str(i + 1), multiline=False) for i in range(0, 9)]
