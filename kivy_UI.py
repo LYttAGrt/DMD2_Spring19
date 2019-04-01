@@ -18,8 +18,9 @@ from kivy.uix.textinput import TextInput
 # check version is correct
 kivy.require('1.10.1')
 
+# TODO: run DBMS in thread; launch sample data generator (maybe)
 # TODO: add fool protection s.a. empty fields & usage of _id field
-# TODO: add UPDATE, DELETE ops
+# TODO: add UPDATE, DELETE ops. For UPDATE - insert actual values as hint_texts
 # TODO: use Builder & choose optimal layout
 
 
@@ -85,7 +86,7 @@ class MainActivity(App):
 
         # Part 4 - put the result
         print(cmd)
-        self.list_of_text_inputs[9].text = cmd  # res
+        self.list_of_text_inputs[9].text = str(cmd) # res
         return 0
 
     def build(self):
