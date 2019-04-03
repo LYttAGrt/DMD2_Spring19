@@ -19,9 +19,9 @@ from kivy.uix.textinput import TextInput
 kivy.require('1.10.1')
 
 # TODO: run DBMS in thread; launch sample data generator (maybe)
-# TODO: add fool protection s.a. empty fields & usage of _id field
-# TODO: add UPDATE, DELETE ops. For UPDATE - insert actual values as hint_texts
-# TODO: use Builder & choose optimal layout
+# TODO: add UPDATE, DELETE ops. For UPDATE - insert actual values as hint_texts     set_hint_values() & confirm_ops()
+# TODO: add fool protection s.a. empty fields & usage of _id field                  validate_data()
+# TODO: use Builder & choose optimal layout                                         build()
 
 
 class MainActivity(App):
@@ -31,38 +31,57 @@ class MainActivity(App):
     tables = rdb.db('HMS').table_list().run(conn)
 
     # Puts the values that should be used: F(str, int) -> str
-    def set_hint_value(self, instance, x):
-        # get all necessary indices
+    def set_hint_values(self, instance, param):
+        # get type of ops. Should be one of CRUD types
+        ops_type = self.spinner_crud.text
+        # get all necessary indices of current table
         indices = self.rdb.db('HMS').table(self.spinner_table.text).get(0).keys().run(self.conn)
-        # set all hint_texts
-        for i in range(len(indices)):
-            self.list_of_text_inputs[i].hint_text = indices[i]
-            if self.list_of_text_inputs[i].disabled:
-                self.list_of_text_inputs[i].disabled = False
-            try:
-                if str(self.list_of_text_inputs[i].text).index("_id") > 0:
-                    self.list_of_text_inputs[i].text = "Service field"
-                    self.list_of_text_inputs[i].disabled = True
-            except ValueError:
-                continue
-        for i in range(len(indices), len(self.list_of_text_inputs) - 1):
-            self.list_of_text_inputs[i].hint_text = "Not used"
-            self.list_of_text_inputs[i].disabled = True
+
+        if ops_type == 'Add':
+            # set all hint_texts for inserting new data
+            for i in range(len(indices)):
+                self.list_of_text_inputs[i].hint_text = "Type addable value of candidate's " + str(indices[i])
+                if self.list_of_text_inputs[i].disabled:
+                    self.list_of_text_inputs[i].disabled = False
+                try:
+                    if str(self.list_of_text_inputs[i].text).index("_id") > 0:
+                        self.list_of_text_inputs[i].text = "Service field"
+                        self.list_of_text_inputs[i].disabled = True
+                except ValueError:
+                    continue
+            for i in range(len(indices), len(self.list_of_text_inputs) - 1):
+                self.list_of_text_inputs[i].hint_text = "Not used"
+                self.list_of_text_inputs[i].disabled = True
+
+        if ops_type == 'Change':
+            # then we use our text_inputs as filters
+            i = 0
+
+        if ops_type == 'Remove':
+            # then we use our text_inputs as filters
+            i = 0
+
+        if ops_type == 'Print':
+            # then we use our text_inputs as filters
+            i = 0
+
         return 0
 
-    # Responded for executing after Button is pressed
-    def button_callback(self, instance):
-        # Part 0 - form basis for ReQL command. Get all values from TextInputs
+    # Checks if values have correct types. Fixes them if necessary
+    def validate_data(self, suspected_data):
+
+        return 0
+
+    # Responded for executing after Button is pressed ~ Controller
+    def confirm_operation(self, instance):
+        # Part 0 - form basis for ReQL command. Get all values from TextInputs. Validate these values.
         cmd = self.rdb.db('HMS')
-        read_values = list()
-        for i in range(0, 9):
-            read_values.append(self.list_of_text_inputs[i].text)
-        print(cmd, read_values)
+        read_values = [self.list_of_text_inputs[i].text for i in range(0, 9)]
+        self.validate_data(read_values)
 
         # Part 1 - choose, what table to work with
         cur_table = self.tables[list(self.tables).index(str(self.spinner_table.text))]
         cmd = cmd.table(cur_table)
-        print(cur_table, cmd)
 
         # Part 2 - choose, what operation to execute
         cur_cmd = self.spinner_crud.text
@@ -73,6 +92,8 @@ class MainActivity(App):
             cmd = cmd.insert(insert_data)
         elif cur_cmd == self.spinner_crud.values[1]:
             # Change ~ update
+            fields_of_cur_table = self.rdb.db('HMS').table(cur_table).get(0).keys().run(self.conn)
+
             print("UPDATE:", cmd)
         elif cur_cmd == self.spinner_crud.values[3]:
             # Remove ~ delete
@@ -89,6 +110,7 @@ class MainActivity(App):
         self.list_of_text_inputs[9].text = str(cmd) # res
         return 0
 
+    # Responds for View part
     def build(self):
         # Layout ~ container for widgets
         layout = BoxLayout(orientation='vertical')
@@ -100,7 +122,7 @@ class MainActivity(App):
         self.spinner_table = Spinner(text='Choose table',
                                      values=tuple(self.rdb.db('HMS').table_list().run(self.conn)),
                                      size=(50, 20))
-        self.spinner_table.bind(text=self.set_hint_value)
+        self.spinner_table.bind(text=self.set_hint_values)
 
         # Also we'll need 9 text fields, whose value depends on Table_Selector.value, plus result shower
         self.list_of_text_inputs = [TextInput(hint_text=str(i + 1), multiline=False) for i in range(0, 9)]
@@ -108,7 +130,7 @@ class MainActivity(App):
 
         # and, finally, confirming Button
         self.btn_action = Button(text='Confirm')
-        self.btn_action.bind(on_press=self.button_callback)
+        self.btn_action.bind(on_press=self.confirm_operation)
 
         # Now, add all these widgets to layout & return it
         layout.add_widget(self.spinner_crud)

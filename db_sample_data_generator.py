@@ -10,6 +10,7 @@ r = RethinkDB()
 # TODO for tables who stores coordinate:
 #  since geospatial search is required - maybe use index_create(geo=True). Check RethinkDB docs for details
 # TODO for stories & forms - check uniqueness of pairs [owner, forms]
+# TODO add some sample for Departments.lists
 
 # ----------------------------------------------------------------------------------------------------------------------
 # part 1: create all tables used. Since all fields of each table should be described - use direct table creation
@@ -87,6 +88,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
             'home_address': home_addr.address(),
             'salary': 12000.00
         }).run(conn)
+    print('Doctors table ready')
 
     # Nurses generator
     for i in range(nurses_amount):
@@ -101,6 +103,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
             'home_address': home_addr.address(),
             'salary': 27000.00
         }).run(conn)
+    print('Nurses table ready')
 
     # Paramedics generator
     for i in range(paramedic_amount):
@@ -115,6 +118,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
             'home_address': home_addr.address(),
             'salary': 16600.00
         }).run(conn)
+    print('Paramedics table ready')
 
     # Administrators generator
     admins_types = ['Dean of the Hospital', 'Hospital Administrator', 'Head of Surgeons and Doctors Department',
@@ -133,6 +137,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
             'home_address': home_addr.address(),
             'salary': 0.00
         }).run(conn)
+    print('Administrators table ready')
 
     # Stuff generator
     for i in range(stuff_amount):
@@ -147,6 +152,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
             'home_address': home_addr.address(),
             'salary': 8800.00
         }).run(conn)
+    print('Stuff table ready')
 
     for i in range(total_patients_amount):
         coin = randint(0, 1)
@@ -165,6 +171,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
             'coordinates': {float(randint(10000, 300000) / 100), float(randint(10000, 300000) / 100)},
             'illness_history_head_id': i
         }).run(conn)
+    print('Patients table ready')
 
     # Let's link a little illness histories with their owners.
     # Also, by analogue of extended books, next_ids can be used
@@ -175,6 +182,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
             'forms_ids': [],
             'next_id': ''
         }).run(conn)
+    print('Histories table ready')
 
     # for this table - maybe generate different types of forms
     form_types = ['069-uf', '322-es', '183-op', '013-dt']
@@ -196,6 +204,9 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
         a = r.table('IllnessHistories').get(patient_id)['forms_ids'].append(i).run(conn)
         r.table('IllnessHistories').filter(r.row['owner_id'] == patient_id).update({'forms_ids': a}).run(conn)
 
+        if i / 256 == 0:
+            print('Forms inserted:', float(i / (3*total_patients_amount)), '%')
+
     # Hospital generator
     r.table('Hospital').insert({
         'hospital_id': 0,
@@ -204,19 +215,21 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
         'director': 'wanted',
         'departments': doctor_types
     }).run(conn)
+    print('Hospital table ready')
 
     # Departments generator
     for i in range(len(doctor_types)):
         r.table('Departments').insert({
             'department_id': i,
             'name': doctor_types[i],
-            'leader_id': total_employees_amount,
+            'leader_id': randint(0, doctors_amount),
             'doctors_ids': [total_employees_amount],
             'nurses_ids': [total_employees_amount],
             'administrators_ids': [total_employees_amount],
             'stuff_ids': [total_employees_amount],
             'beds': randint(15, 50)
         }).run(conn)
+    print('Departments table ready')
 
     # Ambulance generator
     for i in range(ambulance_amount):
@@ -227,6 +240,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
             'paramedic_ids': ['wanted'],
             'coords': {0.00, 0.00}
         }).run(conn)
+    print('Ambulances table ready')
 
     return 0
 
@@ -267,7 +281,7 @@ def generate_new_data():
     print('All tables set up.')
 
     # point 2: fill up these tables *according to some half-randomized aggregation*
-    generate_sample_data(total_employees_amount=20, total_patients_amount=100, conn=conn)
+    generate_sample_data(total_employees_amount=200, total_patients_amount=1000, conn=conn)
     print('Sample data generated.')
 
     return 0
