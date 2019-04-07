@@ -18,10 +18,10 @@ from kivy.uix.textinput import TextInput
 # check version is correct
 kivy.require('1.10.1')
 
-# TODO: run DBMS in thread; launch sample data generator (maybe)
-# TODO: add UPDATE, DELETE ops. For UPDATE - insert actual values as hint_texts     set_hint_values() & confirm_ops()
+
+# TODO: add INSERT, GET ops. For GET - insert actual values as hint_texts     set_hint_values() & confirm_ops()
 # TODO: add fool protection s.a. empty fields & usage of _id field                  validate_data()
-# TODO: use Builder & choose optimal layout                                         build()
+# TODO: use Builder & choose optimal layout                                        build()
 
 
 class MainActivity(App):
