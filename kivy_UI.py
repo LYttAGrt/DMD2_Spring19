@@ -68,16 +68,17 @@ class MainActivity(App):
         return 0
 
     # Checks if values have correct types. Fixes them if necessary
+    # suspected_data is wanted as a dictionary of pairs field-value
     def validate_data(self, suspected_data):
-
-        return 0
+        for entry in suspected_data:
+            break
+        return True
 
     # Responded for executing after Button is pressed ~ Controller
     def confirm_operation(self, instance):
         # Part 0 - form basis for ReQL command. Get all values from TextInputs. Validate these values.
         cmd = self.rdb.db('HMS')
         read_values = [self.list_of_text_inputs[i].text for i in range(0, 9)]
-        self.validate_data(read_values)
 
         # Part 1 - choose, what table to work with
         cur_table = self.tables[list(self.tables).index(str(self.spinner_table.text))]
@@ -89,25 +90,32 @@ class MainActivity(App):
             # Add ~ insert
             fields_of_cur_table = self.rdb.db('HMS').table(cur_table).get(0).keys().run(self.conn)
             insert_data = dict(zip(fields_of_cur_table, read_values[0:len(fields_of_cur_table)]))
+            self.validate_data(insert_data)
             cmd = cmd.insert(insert_data)
         elif cur_cmd == self.spinner_crud.values[1]:
             # Change ~ update
             fields_of_cur_table = self.rdb.db('HMS').table(cur_table).get(0).keys().run(self.conn)
-
+            update_data = dict()
+            self.validate_data(update_data)
             print("UPDATE:", cmd)
         elif cur_cmd == self.spinner_crud.values[3]:
             # Remove ~ delete
+            remove_data = dict()
+            self.validate_data(remove_data)
             print("DELETE:", cmd)
         else:
             # Print ~ get
-            read_id = self.list_of_text_inputs[0].text
-            cmd = cmd.get(read_id)
+            get_data = dict()
+            self.validate_data(get_data)
+            print("GET:", cmd)
+
         # Part 3 - run formed command
-        # res = cmd.run(conn)
+        res = cmd.run(self.conn)
 
         # Part 4 - put the result
         print(cmd)
-        self.list_of_text_inputs[9].text = str(cmd) # res
+        self.list_of_text_inputs[9].text = str(res)  # cmd
+
         return 0
 
     # Responds for View part
