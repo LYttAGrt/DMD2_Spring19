@@ -1,6 +1,6 @@
 from rethinkdb import RethinkDB
 # import os
-from random import randint
+from random import *
 import mimesis
 from mimesis.enums import Gender
 
@@ -8,7 +8,7 @@ r = RethinkDB()
 
 
 # TODO for tables who stores coordinate:
-#  since geospatial search is required - maybe use index_create(geo=True). Check RethinkDB docs for details
+#  Since geospatial search is required - maybe use index_create(geo=True). Check RethinkDB docs for details
 # TODO for stories & forms - check uniqueness of pairs [owner, forms]
 # TODO add some sample for Departments.lists
 
@@ -65,6 +65,8 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
     admins_amount = int(0.15 * total_employees_amount)
     stuff_amount = int(0.10 * total_employees_amount)
     ambulance_amount = int(0.01 * total_employees_amount) + 1
+#   coordinates of Inno
+    origin = (55.752258, 48.744576)
 
     # add multipliers such as no more than 1 Hospital - partially done
     # add loops - partially done
@@ -168,7 +170,8 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
             'SSN_ID': ssn_id.between(minimum=1000000000000000, maximum=10000000000000000 - 1),
             'telephone': ssn_id.between(minimum=89000000000, maximum=89999999999),
             'home_address': home_addr.address(),
-            'coordinates': {float(randint(10000, 300000) / 100), float(randint(10000, 300000) / 100)},
+            'coordinate_x': normalvariate(55.752258, 0.5),
+            'coordinate_y': normalvariate(48.744576, 0.5),
             'illness_history_head_id': i
         }).run(conn)
     print('Patients table ready')
@@ -211,7 +214,8 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
     r.table('Hospital').insert({
         'hospital_id': 0,
         'address': home_addr.address(),
-        'coordinates': {0.00, 0.00},
+        'coordinates_x': 55.752258,
+        'coordinates_y': 48.744576,
         'director': 'wanted',
         'departments': doctor_types
     }).run(conn)
@@ -238,7 +242,8 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
             'driver_id': 'wanted',
             'doctor_id': 'wanted',
             'paramedic_ids': ['wanted'],
-            'coords': {0.00, 0.00}
+            'coords_x': normalvariate(55.752258, 0.5),
+            'coords_y': normalvariate(48.744576, 0.5)
         }).run(conn)
     print('Ambulances table ready')
 
@@ -288,3 +293,4 @@ def generate_new_data():
 
 
 generate_new_data()
+
