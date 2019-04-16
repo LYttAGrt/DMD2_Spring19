@@ -20,8 +20,8 @@ kivy.require('1.10.1')
 
 
 # TODO: add INSERT, GET ops. For GET - insert actual values as hint_texts     set_hint_values() & confirm_ops()
-# TODO: add fool protection s.a. empty fields & usage of _id field                  validate_data()
-# TODO: use Builder & choose optimal layout                                        build()
+# TODO: add fool protection s.a. empty fields & usage of _id field            validate_data()
+# TODO: use Builder & choose optimal layout                                   build()
 
 
 class MainActivity(App):
@@ -41,8 +41,7 @@ class MainActivity(App):
             # set all hint_texts for inserting new data
             for i in range(len(indices)):
                 self.list_of_text_inputs[i].hint_text = "Type addable value of candidate's " + str(indices[i])
-                if self.list_of_text_inputs[i].disabled:
-                    self.list_of_text_inputs[i].disabled = False
+                self.list_of_text_inputs[i].disabled = False
                 try:
                     if str(self.list_of_text_inputs[i].text).index("_id") > 0:
                         self.list_of_text_inputs[i].text = "Service field"
@@ -54,25 +53,26 @@ class MainActivity(App):
                 self.list_of_text_inputs[i].disabled = True
 
         if ops_type == 'Change':
-            # then we use our text_inputs as filters
-            i = 0
+            # we don't realize this feature
+            for i in range(len(self.list_of_text_inputs)):
+                self.list_of_text_inputs[i].hint_text = "Feature is unavailable"
+                self.list_of_text_inputs[i].disabled = True
 
         if ops_type == 'Remove':
             # then we use our text_inputs as filters
-            i = 0
+            pass
 
         if ops_type == 'Print':
             # then we use our text_inputs as filters
-            i = 0
+            pass
 
         return 0
 
     # Checks if values have correct types. Fixes them if necessary
     # suspected_data is wanted as a dictionary of pairs field-value
-    def validate_data(self, suspected_data):
-        for entry in suspected_data:
-            break
-        return True
+    def validate_data(self, suspected_data: dict):
+        validated_data = dict.fromkeys(suspected_data.keys())
+        return validated_data
 
     # Responded for executing after Button is pressed ~ Controller
     def confirm_operation(self, instance):
@@ -84,36 +84,31 @@ class MainActivity(App):
         cur_table = self.tables[list(self.tables).index(str(self.spinner_table.text))]
         cmd = cmd.table(cur_table)
 
-        # Part 2 - choose, what operation to execute
+        # Part 2 - choose, what operation to execute, with part 3 - run formed command
         cur_cmd = self.spinner_crud.text
         if cur_cmd == self.spinner_crud.values[0]:
             # Add ~ insert
             fields_of_cur_table = self.rdb.db('HMS').table(cur_table).get(0).keys().run(self.conn)
             insert_data = dict(zip(fields_of_cur_table, read_values[0:len(fields_of_cur_table)]))
-            self.validate_data(insert_data)
-            cmd = cmd.insert(insert_data)
+            cmd = cmd.insert(self.validate_data(insert_data))
+            res = cmd.run(self.conn)
         elif cur_cmd == self.spinner_crud.values[1]:
-            # Change ~ update
-            fields_of_cur_table = self.rdb.db('HMS').table(cur_table).get(0).keys().run(self.conn)
-            update_data = dict()
-            self.validate_data(update_data)
-            print("UPDATE:", cmd)
+            # Change ~ update. Not used
+            res = "Not realized"
         elif cur_cmd == self.spinner_crud.values[3]:
             # Remove ~ delete
             remove_data = dict()
             self.validate_data(remove_data)
+            res = cmd.run(self.conn)
             print("DELETE:", cmd)
         else:
             # Print ~ get
             get_data = dict()
             self.validate_data(get_data)
+            res = cmd.run(self.conn)
             print("GET:", cmd)
 
-        # Part 3 - run formed command
-        res = cmd.run(self.conn)
-
-        # Part 4 - put the result
-        print(cmd)
+        # Part 4 - put the result in result text_input
         self.list_of_text_inputs[9].text = str(res)  # cmd
 
         return 0

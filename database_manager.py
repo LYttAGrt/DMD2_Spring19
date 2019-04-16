@@ -7,8 +7,6 @@ from mimesis.enums import Gender
 r = RethinkDB()
 
 
-# TODO for tables who stores coordinate:
-#  Since geospatial search is required - maybe use index_create(geo=True). Check RethinkDB docs for details
 # TODO for stories & forms - check uniqueness of pairs [owner, forms]
 # TODO add some sample for Departments.lists
 
