@@ -12,16 +12,14 @@ from kivy.uix.button import Button
 from kivy.uix.spinner import Spinner
 from kivy.uix.textinput import TextInput
 
-# Builder shall be used to markup all widgets
+# Builder can be used to markup all widgets
 # from kivy.lang import Builder
 
-# check version is correct
+# check kivy-version is correct
 kivy.require('1.10.1')
 
 
-# TODO: add INSERT, GET ops. For GET - insert actual values as hint_texts     set_hint_values() & confirm_ops()
-# TODO: add fool protection s.a. empty fields & usage of _id field            validate_data()
-# TODO: use Builder & choose optimal layout                                   build()
+# TODO: finish GET ops via filtering the data
 
 
 class MainActivity(App):
@@ -40,39 +38,222 @@ class MainActivity(App):
         if ops_type == 'Add':
             # set all hint_texts for inserting new data
             for i in range(len(indices)):
-                self.list_of_text_inputs[i].hint_text = "Type addable value of candidate's " + str(indices[i])
-                self.list_of_text_inputs[i].disabled = False
                 try:
-                    if str(self.list_of_text_inputs[i].text).index("_id") > 0:
-                        self.list_of_text_inputs[i].text = "Service field"
+                    substr = str(indices[i]).index("primary_id")
+                    if str(indices[i]).index("_id") != -1 and substr != -1:
+                        self.list_of_text_inputs[i].hint_text = str("Service field: " + str(indices[i]))
                         self.list_of_text_inputs[i].disabled = True
                 except ValueError:
-                    continue
+                    self.list_of_text_inputs[i].hint_text = "Type addable value of candidate's " + str(indices[i])
+                    self.list_of_text_inputs[i].disabled = False
+                    self.list_of_text_inputs[i].text = ""
             for i in range(len(indices), len(self.list_of_text_inputs) - 1):
                 self.list_of_text_inputs[i].hint_text = "Not used"
                 self.list_of_text_inputs[i].disabled = True
+                self.list_of_text_inputs[i].text = ""
 
         if ops_type == 'Change':
-            # we don't realize this feature
-            for i in range(len(self.list_of_text_inputs)):
+            # we don't realize this feature, but fool protection should exist
+            for i in range(len(self.list_of_text_inputs) - 1):
                 self.list_of_text_inputs[i].hint_text = "Feature is unavailable"
                 self.list_of_text_inputs[i].disabled = True
 
         if ops_type == 'Remove':
             # then we use our text_inputs as filters
-            pass
+            for i in range(len(indices)):
+                self.list_of_text_inputs[i].hint_text = "Type filterable value of candidate's " + str(indices[i])
+                self.list_of_text_inputs[i].disabled = False
+                self.list_of_text_inputs[i].text = ""
+            for i in range(len(indices), len(self.list_of_text_inputs) - 1):
+                self.list_of_text_inputs[i].hint_text = "Not used"
+                self.list_of_text_inputs[i].disabled = True
+                self.list_of_text_inputs[i].text = ""
 
         if ops_type == 'Print':
             # then we use our text_inputs as filters
-            pass
+            for i in range(len(indices)):
+                self.list_of_text_inputs[i].hint_text = "Type filterable value of candidate's " + str(indices[i])
+                self.list_of_text_inputs[i].disabled = False
+                self.list_of_text_inputs[i].text = ""
+            for i in range(len(indices), len(self.list_of_text_inputs) - 1):
+                self.list_of_text_inputs[i].hint_text = "Not used"
+                self.list_of_text_inputs[i].disabled = True
+                self.list_of_text_inputs[i].text = ""
 
-        return 0
+        return True
 
-    # Checks if values have correct types. Fixes them if necessary
-    # suspected_data is wanted as a dictionary of pairs field-value
+    # Checks if values have correct types. Doesn't fix incorrect values.
+    # suspected_data: dictionary of pairs (index as field name, value of field)
     def validate_data(self, suspected_data: dict):
-        validated_data = dict.fromkeys(suspected_data.keys())
-        return validated_data
+        if self.spinner_crud.text == "Add":
+            for entry in suspected_data:
+                # if key reflects list of ids, value should be a list of ints
+                if str(entry).find("_ids") != -1:
+                    # check if it's a list
+                    if type(suspected_data[entry]) != list:
+                        print(suspected_data[entry], "is not a list.")
+                        return False
+                    # check it contains integers only
+                    for k in range(len(suspected_data[entry])):
+                        try:
+                            suspected_data[entry][k] = int(suspected_data[entry][k])
+                        except ValueError:
+                            print(str(suspected_data[entry][k]), "is not an integer. Check rest List members.")
+                            return False
+
+                # if key is an identifier, value should be integer only
+                if str(entry).find("_id") != -1:
+                    if type(suspected_data[entry]) != int:
+                        print(str(suspected_data[entry], "is not an integer"))
+                        return False
+
+                # and now rest params that can fail the data system
+                if str(entry).find("_amount") == -1:
+                    if type(suspected_data[entry]) != int:
+                        print(str(suspected_data[entry], "is not an integer"))
+                        return False
+
+                if str(entry) == "SSN_ID":
+                    if not str(suspected_data[entry]).isnumeric() and len(str(suspected_data[entry])) != 16:
+                        print("SSN_ID should be 16-digit number.")
+                        return False
+
+                if str(entry) == "telephone":
+                    if not str(suspected_data[entry]).isnumeric() and len(str(suspected_data[entry])) != 11:
+                        print("telephone should 11-digit number, starting from 8")
+                        return False
+
+                if str(entry) == "date_of_birth":
+                    buf = str(suspected_data[entry]).split("-")
+                    if len(buf) != 3:
+                        print("Date of birth should be in format <dd-mm-yyyy>")
+                        return False
+                    for num in buf:
+                        if not str(num).isnumeric():
+                            print("Date of birth should be in format <dd-mm-yyyy>")
+                            return False
+
+                if str(entry) == "coordinates":
+                    if len(suspected_data[entry] != 2):
+                        print("coordinates should be 2 numbers")
+                        return False
+                    try:
+                        latitude = float(suspected_data[entry][0])
+                        longtitude = float(suspected_data[entry][1])
+                        if abs(latitude) > 90:
+                            print("abs(latitude) shouldn't exceed 90 degrees")
+                            return False
+                        if abs(longtitude) > 180:
+                            print("abs(longtitude) shouldn't exceed 180 degrees")
+                            return False
+                    except ValueError:
+                        print("coordinates should be Numbers")
+                        return False
+
+                if str(entry) == "sex":
+                    if str(suspected_data[entry]) not in ['male', 'female']:
+                        print(str(suspected_data[entry]), "is not a gender!")
+                        return False
+
+                if str(entry) == "salary":
+                    try:
+                        m_salary = float(str(suspected_data[entry]))
+                        if m_salary < 0.0:
+                            print("Who pays negative salary?")
+                            return False
+                    except ValueError:
+                        print("salary should be a Number")
+                        return False
+
+        if self.spinner_crud.text == "Print" or self.spinner_crud.text == "Remove":
+            for entry in suspected_data:
+                # cut all empty values
+                if suspected_data[entry] != "":
+                    # we'll filter by one value OR between two values
+                    buffer_entry = str(suspected_data[entry]).split(' ')
+                    for c in range(len(buffer_entry)):
+                        # if key reflects list of ids, value should be a list of ints
+                        if str(buffer_entry[c]).find("_ids") != -1:
+                            # check if it's a list
+                            if type(suspected_data[buffer_entry[c]]) != list:
+                                print(suspected_data[buffer_entry[c]], "is not a list.")
+                                return False
+                            # check it contains integers only
+                            for k in range(len(suspected_data[buffer_entry[c]])):
+                                try:
+                                    suspected_data[buffer_entry[c]][k] = int(suspected_data[buffer_entry[c]][k])
+                                except ValueError:
+                                    print(str(suspected_data[buffer_entry[c]][k]),
+                                          "is not an integer. Check rest List members.")
+                                    return False
+
+                        # if key is an identifier, value should be integer only
+                        if str(buffer_entry[c]).find("_id") != -1:
+                            if type(suspected_data[buffer_entry[c]]) != int:
+                                print(str(suspected_data[buffer_entry[c]], "is not an integer"))
+                                return False
+
+                        # and now rest params that can fail the data system
+                        if str(buffer_entry[c]).find("_amount") == -1:
+                            if type(suspected_data[buffer_entry[c]]) != int:
+                                print(str(suspected_data[buffer_entry[c]], "is not an integer"))
+                                return False
+
+                        if str(buffer_entry[c]) == "SSN_ID":
+                            if not str(suspected_data[buffer_entry[c]]).isnumeric() and len(
+                                    str(suspected_data[buffer_entry[c]])) != 16:
+                                print("SSN_ID should be 16-digit number.")
+                                return False
+
+                        if str(buffer_entry[c]) == "telephone":
+                            if not str(suspected_data[buffer_entry[c]]).isnumeric() and len(
+                                    str(suspected_data[buffer_entry[c]])) != 11:
+                                print("telephone should 11-digit number, starting from 8")
+                                return False
+
+                        if str(buffer_entry[c]) == "date_of_birth":
+                            buf = str(suspected_data[buffer_entry[c]]).split("-")
+                            if len(buf) != 3:
+                                print("Date of birth should be in format <dd-mm-yyyy>")
+                                return False
+                            for num in buf:
+                                if not str(num).isnumeric():
+                                    print("Date of birth should be in format <dd-mm-yyyy>")
+                                    return False
+
+                        if str(buffer_entry[c]) == "coordinates":
+                            if len(suspected_data[buffer_entry[c]] != 2):
+                                print("coordinates should be 2 numbers")
+                                return False
+                            try:
+                                latitude = float(suspected_data[buffer_entry[c]][0])
+                                longtitude = float(suspected_data[buffer_entry[c]][1])
+                                if abs(latitude) > 90:
+                                    print("abs(latitude) shouldn't exceed 90 degrees")
+                                    return False
+                                if abs(longtitude) > 180:
+                                    print("abs(longtitude) shouldn't exceed 180 degrees")
+                                    return False
+                            except ValueError:
+                                print("coordinates should be Numbers")
+                                return False
+
+                        if str(buffer_entry[c]) == "sex":
+                            if str(suspected_data[buffer_entry[c]]) not in ['male', 'female']:
+                                print(str(suspected_data[buffer_entry[c]]), "is not a gender!")
+                                return False
+
+                        if str(buffer_entry[c]) == "salary":
+                            try:
+                                m_salary = float(str(suspected_data[buffer_entry[c]]))
+                                if m_salary < 0.0:
+                                    print("Who pays negative salary?")
+                                    return False
+                            except ValueError:
+                                print("salary should be a Number")
+                                return False
+
+        return True
 
     # Responded for executing after Button is pressed ~ Controller
     def confirm_operation(self, instance):
@@ -82,34 +263,38 @@ class MainActivity(App):
 
         # Part 1 - choose, what table to work with
         cur_table = self.tables[list(self.tables).index(str(self.spinner_table.text))]
+        fields_of_cur_table = self.rdb.db('HMS').table(cur_table).get(0).keys().run(self.conn)
         cmd = cmd.table(cur_table)
+        res = str(cmd)
 
         # Part 2 - choose, what operation to execute, with part 3 - run formed command
         cur_cmd = self.spinner_crud.text
         if cur_cmd == self.spinner_crud.values[0]:
             # Add ~ insert
-            fields_of_cur_table = self.rdb.db('HMS').table(cur_table).get(0).keys().run(self.conn)
             insert_data = dict(zip(fields_of_cur_table, read_values[0:len(fields_of_cur_table)]))
-            cmd = cmd.insert(self.validate_data(insert_data))
+            if not self.validate_data(insert_data):
+                self.list_of_text_inputs[len(self.list_of_text_inputs) - 1].text = "Incorrect input data!"
+                return 0
+            cmd = cmd.insert(insert_data)
             res = cmd.run(self.conn)
         elif cur_cmd == self.spinner_crud.values[1]:
             # Change ~ update. Not used
             res = "Not realized"
         elif cur_cmd == self.spinner_crud.values[3]:
             # Remove ~ delete
-            remove_data = dict()
-            self.validate_data(remove_data)
-            res = cmd.run(self.conn)
+            remove_data = dict(zip(fields_of_cur_table, read_values[0:len(fields_of_cur_table)]))
+            if not self.validate_data(remove_data):
+                res = cmd.run(self.conn)
             print("DELETE:", cmd)
         else:
             # Print ~ get
-            get_data = dict()
-            self.validate_data(get_data)
-            res = cmd.run(self.conn)
+            # get_data = dict(zip(fields_of_cur_table, read_values[0:len(fields_of_cur_table)]))
+            # self.validate_data(get_data)
+            # res = cmd.run(self.conn)
             print("GET:", cmd)
 
         # Part 4 - put the result in result text_input
-        self.list_of_text_inputs[9].text = str(res)  # cmd
+        self.list_of_text_inputs[len(self.list_of_text_inputs) - 1].text = str(res)  # cmd
 
         return 0
 

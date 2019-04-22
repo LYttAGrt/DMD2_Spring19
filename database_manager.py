@@ -2,42 +2,42 @@ from rethinkdb import RethinkDB
 # import os
 from random import *
 import mimesis
+import datetime
 from mimesis.enums import Gender
 
 r = RethinkDB()
 
 
-# TODO for stories & forms - check uniqueness of pairs [owner, forms]
 # TODO add some sample for Departments.lists
 
 # ----------------------------------------------------------------------------------------------------------------------
 # part 1: create all tables used. Since all fields of each table should be described - use direct table creation
 def create_all_tables(connection):
     # id as PK, name, date_of_birth, sex, qualification, SSN_ID, telephone, home_address, salary
-    r.table_create('Doctors', primary_key='doctor_id').run(connection)
+    r.table_create('Doctors', primary_key='primary_id').run(connection)
     # id as PK, name, date_of_birth, sex, qualification, SSN_ID, telephone, home_address, salary
-    r.table_create('Nurses', primary_key='nurse_id').run(connection)
+    r.table_create('Nurses', primary_key='primary_id').run(connection)
     # id as PK, name, date_of_birth, sex, qualification, SSN_ID, telephone, home_address, salary
-    r.table_create('Paramedics', primary_key='paramedic_id').run(connection)
+    r.table_create('Paramedics', primary_key='primary_id').run(connection)
     # id as PK, name, date_of_birth, sex, qualification, SSN_ID, telephone, home_address, salary
-    r.table_create('Administrators', primary_key='administrator_id').run(connection)
+    r.table_create('Administrators', primary_key='primary_id').run(connection)
     # id as PK, name, date_of_birth, sex, vacated position, SSN_ID, telephone, home_address, salary
-    r.table_create('Stuff', primary_key='stuff_id').run(connection)
+    r.table_create('Stuff', primary_key='primary_id').run(connection)
     # id as PK, name, date_of_birth, sex, SSN_ID, telephone, home_address, coordinates
-    r.table_create('Patients', primary_key='patient_id').run(connection)
+    r.table_create('Patients', primary_key='primary_id').run(connection)
 
     # id as PK, owner, data, next_id
-    r.table_create('IllnessHistories', primary_key='history_id').run(connection)
+    r.table_create('IllnessHistories', primary_key='primary_id').run(connection)
     # id as PK, form_type, doctor_id, patient_id, type_of_procedure (checking, operation),
     # list of additional data as key-value
-    r.table_create('IllnessForms', primary_key='form_id').run(connection)
+    r.table_create('IllnessForms', primary_key='primary_id').run(connection)
 
     # id as PK==0, address, coords, director, list of departments
-    r.table_create('Hospital', primary_key='hospital_id').run(connection)
+    r.table_create('Hospital', primary_key='primary_id').run(connection)
     # id as PK, name, id_of_leader, ids_of_doctors, ids_of_nurses, ids_of_admins, ids_of_stuff, maybe # beds
-    r.table_create('Departments', primary_key='department_id').run(connection)
+    r.table_create('Departments', primary_key='primary_id').run(connection)
     # id as PK, driver_id, doctor_id, list of paramedic_id, coords
-    r.table_create('Ambulances', primary_key='ambulance_id').run(connection)
+    r.table_create('Ambulances', primary_key='primary_id').run(connection)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -63,7 +63,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
     admins_amount = int(0.15 * total_employees_amount)
     stuff_amount = int(0.10 * total_employees_amount)
     ambulance_amount = int(0.01 * total_employees_amount) + 1
-#   coordinates of Inno
+    # coordinates of Inno
     origin = (55.752258, 48.744576)
 
     # add multipliers such as no more than 1 Hospital - partially done
@@ -76,9 +76,11 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
                     'Obstetrics and gynaecology', 'Orthopedic surgery', 'Ophthalmology', 'Otorhinolaryngology',
                     'Pediatric surgery', 'Podiatric_surgery', 'Plastic surgery', 'Surgical oncology',
                     'Trauma surgery', 'Thoracic surgery', 'Urology', 'General Surgery']
+    # for management - let's use times
+    start_time = datetime.datetime.now()
     for i in range(doctors_amount):
         r.table('Doctors').insert({
-            'doctor_id': i,
+            'primary_id': i,
             'name': gen_person.full_name(gender=Gender.MALE),
             'date_of_birth': str(date.date(start=1950, end=1995)),
             'sex': 'male',
@@ -86,14 +88,15 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
             'SSN_ID': ssn_id.between(minimum=1000000000000000, maximum=10000000000000000 - 1),
             'telephone': ssn_id.between(minimum=89000000000, maximum=89999999999),
             'home_address': home_addr.address(),
-            'salary': 12000.00
+            'salary': 12000.00,
+            'additional_data': {}
         }).run(conn)
-    print('Doctors table ready')
+    print('Doctors table ready', str(datetime.datetime.now() - start_time), "passed")
 
     # Nurses generator
     for i in range(nurses_amount):
         r.table('Nurses').insert({
-            'nurse_id': i,
+            'primary_id': i,
             'name': gen_person.full_name(gender=Gender.FEMALE),
             'date_of_birth': str(date.date(start=1950, end=1997)),
             'sex': 'female',
@@ -101,14 +104,15 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
             'SSN_ID': ssn_id.between(minimum=1000000000000000, maximum=10000000000000000 - 1),
             'telephone': ssn_id.between(minimum=89000000000, maximum=89999999999),
             'home_address': home_addr.address(),
-            'salary': 27000.00
+            'salary': 27000.00,
+            'additional_data': {}
         }).run(conn)
-    print('Nurses table ready')
+    print('Nurses table ready', str(datetime.datetime.now() - start_time), "passed")
 
     # Paramedics generator
     for i in range(paramedic_amount):
         r.table('Paramedics').insert({
-            'paramedic_id': i,
+            'primary_id': i,
             'name': gen_person.full_name(gender=Gender.MALE),
             'date_of_birth': str(date.date(start=1980, end=2000)),
             'sex': 'male',
@@ -116,9 +120,10 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
             'SSN_ID': ssn_id.between(minimum=1000000000000000, maximum=10000000000000000 - 1),
             'telephone': ssn_id.between(minimum=89000000000, maximum=89999999999),
             'home_address': home_addr.address(),
-            'salary': 16600.00
+            'salary': 16600.00,
+            'additional_data': {}
         }).run(conn)
-    print('Paramedics table ready')
+    print('Paramedics table ready', str(datetime.datetime.now() - start_time), "passed")
 
     # Administrators generator
     admins_types = ['Dean of the Hospital', 'Hospital Administrator', 'Head of Surgeons and Doctors Department',
@@ -127,7 +132,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
                     'Medical Student Administration', 'Inventory Head']
     for i in range(admins_amount):
         r.table('Administrators').insert({
-            'administrator_id': i,
+            'primary_id': i,
             'name': gen_person.full_name(gender=Gender.FEMALE),
             'date_of_birth': str(date.date(start=1970, end=1990)),
             'sex': 'male',
@@ -135,14 +140,15 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
             'SSN_ID': ssn_id.between(minimum=1000000000000000, maximum=10000000000000000 - 1),
             'telephone': ssn_id.between(minimum=89000000000, maximum=89999999999),
             'home_address': home_addr.address(),
-            'salary': 0.00
+            'salary': 0.00,
+            'additional_data': {}
         }).run(conn)
-    print('Administrators table ready')
+    print('Administrators table ready', str(datetime.datetime.now() - start_time), "passed")
 
     # Stuff generator
     for i in range(stuff_amount):
         r.table('Stuff').insert({
-            'stuff_id': i,
+            'primary_id': i,
             'name': gen_person.full_name(gender=Gender.FEMALE),
             'date_of_birth': str(date.date(start=1950, end=2000)),
             'sex': 'female',
@@ -150,9 +156,10 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
             'SSN_ID': ssn_id.between(minimum=1000000000000000, maximum=10000000000000000 - 1),
             'telephone': ssn_id.between(minimum=89000000000, maximum=89999999999),
             'home_address': home_addr.address(),
-            'salary': 8800.00
+            'salary': 8800.00,
+            'additional_data': {}
         }).run(conn)
-    print('Stuff table ready')
+    print('Stuff table ready', str(datetime.datetime.now() - start_time), "passed")
 
     for i in range(total_patients_amount):
         coin = randint(0, 1)
@@ -161,89 +168,96 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
         else:
             gender = Gender.FEMALE
         r.table('Patients').insert({
-            'patient_id': i,
+            'primary_id': i,
             'name': gen_person.full_name(gender=gender),
             'date_of_birth': str(date.date(start=1935, end=2015)),
             'sex': str(gender.value),
             'SSN_ID': ssn_id.between(minimum=1000000000000000, maximum=10000000000000000 - 1),
             'telephone': ssn_id.between(minimum=89000000000, maximum=89999999999),
             'home_address': home_addr.address(),
-            'coordinate_x': normalvariate(55.752258, 0.5),
-            'coordinate_y': normalvariate(48.744576, 0.5),
-            'illness_history_head_id': i
+            'coordinates': r.point(normalvariate(origin[0], 0.5), normalvariate(origin[1], 0.5)),
+            'illness_history_head_id': i,
+            'additional_data': {}
         }).run(conn)
-    print('Patients table ready')
+    print('Patients table ready', str(datetime.datetime.now() - start_time), "passed")
 
     # Let's link a little illness histories with their owners.
     # Also, by analogue of extended books, next_ids can be used
     for i in range(total_patients_amount):
         r.table('IllnessHistories').insert({
-            'history_id': i,
+            'primary_id': i,
             'owner_id': i,
-            'forms_ids': [],
-            'next_id': ''
+            'forms_ids': [int(i*3 + 0), int(i*3 + 1), int(i*3 + 2)],
+            'next_id': '',
+            'additional_data': {}
         }).run(conn)
-    print('Histories table ready')
+    print('Histories table ready', str(datetime.datetime.now() - start_time), "passed")
 
     # for this table - maybe generate different types of forms
-    form_types = ['069-uf', '322-es', '183-op', '013-dt']
-    for i in range(3 * total_patients_amount):
-        patient_id = randint(0, total_patients_amount - 1)
-        procedure_types = ['bone removing', 'bone updating', 'bone inserting', 'bone growing']
-        r.table('IllnessForms').insert({
-            'form_id': i,
-            'form_type': form_types[randint(0, len(form_types) - 1)],
-            'doctor_id': randint(0, doctors_amount - 1),
-            'patient_id': patient_id,
-            'procedure_type': procedure_types[randint(0, len(procedure_types) - 1)],
-            'additional_information': {
-                # so, form data by itself should be stored here
-                'operation_type': '',
-                'result': 'success'
-            }
-        }).run(conn)
-        a = r.table('IllnessHistories').get(patient_id)['forms_ids'].append(i).run(conn)
-        r.table('IllnessHistories').filter(r.row['owner_id'] == patient_id).update({'forms_ids': a}).run(conn)
-
-        if i / 256 == 0:
-            print('Forms inserted:', float(i / (3*total_patients_amount)), '%')
+    form_types = ['069-uf', '322-es', '183-op', '013-dt', '080-u', '158-p', '085-u', '072-d']
+    procedure_types = ['bone removing', 'bone updating', 'bone inserting', 'bone growing']
+    for i in range(total_patients_amount):
+        for j in range(3):
+            patient_id = i
+            r.table('IllnessForms').insert({
+                'primary_id': int(3 * i + j),
+                'form_type': form_types[randint(0, len(form_types) - 1)],
+                'doctor_id': randint(0, doctors_amount - 1),
+                'patient_id': patient_id,
+                'procedure_type': procedure_types[randint(0, len(procedure_types) - 1)],
+                'additional_data': {
+                    # so, form data by itself should be stored here
+                    'operation_type': '',
+                    'result': 'success'
+                }
+            }).run(conn)
+        if i % 128 == 0:
+            print('Forms inserted:', float(100 * i / (3*total_patients_amount)), '%',
+                  str(datetime.datetime.now() - start_time), "passed")
 
     # Hospital generator
     r.table('Hospital').insert({
-        'hospital_id': 0,
+        'primary_id': 0,
         'address': home_addr.address(),
-        'coordinates_x': 55.752258,
-        'coordinates_y': 48.744576,
+        'coordinates': r.point(origin[0], origin[1]),
         'director': 'wanted',
-        'departments': doctor_types
+        'departments': doctor_types,
+        'additional_data': {}
     }).run(conn)
-    print('Hospital table ready')
+    print('Hospital table ready', str(datetime.datetime.now() - start_time), "passed")
 
     # Departments generator
-    for i in range(len(doctor_types)):
+    depart_amount = len(doctor_types)
+    for i in range(depart_amount):
         r.table('Departments').insert({
-            'department_id': i,
+            'primary_id': i,
             'name': doctor_types[i],
-            'leader_id': randint(0, doctors_amount),
-            'doctors_ids': [total_employees_amount],
-            'nurses_ids': [total_employees_amount],
-            'administrators_ids': [total_employees_amount],
-            'stuff_ids': [total_employees_amount],
-            'beds': randint(15, 50)
+            'leader_id': randint(0, doctors_amount-1),
+            'doctors_ids': [randint(1, int(doctors_amount)-1) for _ in range(int(doctors_amount / depart_amount))],
+            'nurses_ids': [randint(1, int(nurses_amount)-1) for _ in range(int(nurses_amount / depart_amount))],
+            'administrators_ids': [randint(1, int(admins_amount)-1) for _ in range(int(admins_amount / depart_amount))],
+            'stuff_ids': [randint(1, int(stuff_amount)-1) for _ in range(int(stuff_amount / depart_amount))],
+            'beds_amount': randint(15, 50),
+            'additional_data': {}
         }).run(conn)
-    print('Departments table ready')
+    print('Departments table ready', str(datetime.datetime.now() - start_time), "passed")
 
     # Ambulance generator
     for i in range(ambulance_amount):
         r.table('Ambulances').insert({
-            'ambulance_id': i,
+            'primary_id': i,
             'driver_id': 'wanted',
             'doctor_id': 'wanted',
             'paramedic_ids': ['wanted'],
-            'coords_x': normalvariate(55.752258, 0.5),
-            'coords_y': normalvariate(48.744576, 0.5)
+            'coordinates': r.point(normalvariate(origin[0], 0.5), normalvariate(origin[1], 0.5)),
+            'additional_data': {}
         }).run(conn)
-    print('Ambulances table ready')
+    print('Ambulances table ready', str(datetime.datetime.now() - start_time), "passed")
+
+    # in the end, add geometry support
+    r.db("HMS").table("Patients").index_create("coordinates", geo=True)
+    r.db("HMS").table("Ambulances").index_create("coordinates", geo=True)
+    r.db("HMS").table("Hospital").index_create("coordinates", geo=True)
 
     return 0
 
@@ -284,7 +298,7 @@ def generate_new_data():
     print('All tables set up.')
 
     # point 2: fill up these tables *according to some half-randomized aggregation*
-    generate_sample_data(total_employees_amount=200, total_patients_amount=1000, conn=conn)
+    generate_sample_data(total_employees_amount=300, total_patients_amount=2000, conn=conn)
     print('Sample data generated.')
 
     return 0
