@@ -56,7 +56,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
     date = mimesis.Datetime()
     ssn_id = mimesis.Numbers()
     home_addr = mimesis.Address()
-    stuff_jobs = ['janitor', 'cook', 'guard']
+    stuff_jobs = ['janitor', 'cook', 'guard', 'pharmacist', 'storekeeper']
     doctors_amount = int(0.25 * total_employees_amount)
     nurses_amount = int(0.35 * total_employees_amount)
     paramedic_amount = int(0.15 * total_employees_amount)
@@ -79,9 +79,12 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
     # for management - let's use times
     start_time = datetime.datetime.now()
     for i in range(doctors_amount):
+        name = gen_person.full_name(gender=Gender.MALE)
         r.table('Doctors').insert({
             'primary_id': i,
-            'name': gen_person.full_name(gender=Gender.MALE),
+            'login': name.lower().replace(" ", "."),
+            'password': gen_person.password(10),
+            'name': name,
             'date_of_birth': str(date.date(start=1950, end=1995)),
             'sex': 'male',
             'qualification ': doctor_types[randint(0, len(doctor_types) - 1)],
@@ -95,9 +98,12 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
 
     # Nurses generator
     for i in range(nurses_amount):
+        name = gen_person.full_name(gender=Gender.FEMALE)
         r.table('Nurses').insert({
             'primary_id': i,
-            'name': gen_person.full_name(gender=Gender.FEMALE),
+            'login': name.lower().replace(" ", "."),
+            'password': gen_person.password(10),
+            'name': name,
             'date_of_birth': str(date.date(start=1950, end=1997)),
             'sex': 'female',
             'qualification': 'nurse',
@@ -111,9 +117,12 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
 
     # Paramedics generator
     for i in range(paramedic_amount):
+        name = gen_person.full_name(gender=Gender.MALE)
         r.table('Paramedics').insert({
             'primary_id': i,
-            'name': gen_person.full_name(gender=Gender.MALE),
+            'login': name.lower().replace(" ","."),
+            'password': gen_person.password(10),
+            'name': name,
             'date_of_birth': str(date.date(start=1980, end=2000)),
             'sex': 'male',
             'qualification': 'ambulance paramedic',
@@ -131,9 +140,12 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
                     'Head of Medicine Department', 'Head of Equipment Department', 'Head of Security Department',
                     'Medical Student Administration', 'Inventory Head']
     for i in range(admins_amount):
+        name = gen_person.full_name(gender=Gender.FEMALE)
         r.table('Administrators').insert({
             'primary_id': i,
-            'name': gen_person.full_name(gender=Gender.FEMALE),
+            'login': name.lower().replace(" ", "."),
+            'password': gen_person.password(10),
+            'name': name,
             'date_of_birth': str(date.date(start=1970, end=1990)),
             'sex': 'male',
             'qualification': admins_types[randint(0, len(admins_types) - 1)],
@@ -147,11 +159,18 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
 
     # Stuff generator
     for i in range(stuff_amount):
+        if randint(0, 1) == 1:
+            gender = Gender.MALE
+        else:
+            gender = Gender.FEMALE
+        name = gen_person.full_name(gender=Gender.FEMALE)
         r.table('Stuff').insert({
             'primary_id': i,
-            'name': gen_person.full_name(gender=Gender.FEMALE),
+            'login': name.lower().replace(" ", "."),
+            'password': gen_person.password(10),
+            'name': name,
             'date_of_birth': str(date.date(start=1950, end=2000)),
-            'sex': 'female',
+            'sex': str(gender.value),
             'vacated_position': stuff_jobs[randint(0, len(stuff_jobs) - 1)],
             'SSN_ID': ssn_id.between(minimum=1000000000000000, maximum=10000000000000000 - 1),
             'telephone': ssn_id.between(minimum=89000000000, maximum=89999999999),
@@ -167,9 +186,12 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
             gender = Gender.MALE
         else:
             gender = Gender.FEMALE
+        name = gen_person.full_name(gender=gender)
         r.table('Patients').insert({
             'primary_id': i,
-            'name': gen_person.full_name(gender=gender),
+            'login': name.lower().replace(" ","."),
+            'password': gen_person.password(10),
+            'name': name,
             'date_of_birth': str(date.date(start=1935, end=2015)),
             'sex': str(gender.value),
             'SSN_ID': ssn_id.between(minimum=1000000000000000, maximum=10000000000000000 - 1),
@@ -231,7 +253,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
     for i in range(depart_amount):
         r.table('Departments').insert({
             'primary_id': i,
-            'name': doctor_types[i],
+            'department_name': doctor_types[i],
             'leader_id': randint(0, doctors_amount-1),
             'doctors_ids': [randint(1, int(doctors_amount)-1) for _ in range(int(doctors_amount / depart_amount))],
             'nurses_ids': [randint(1, int(nurses_amount)-1) for _ in range(int(nurses_amount / depart_amount))],
