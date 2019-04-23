@@ -272,6 +272,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
             'doctor_id': 'wanted',
             'paramedic_ids': ['wanted'],
             'coordinates': r.point(normalvariate(origin[0], 0.1), normalvariate(origin[1], 0.05)),
+            'available': "y",
             'additional_data': {}
         }).run(conn)
     print('Ambulances table ready', str(datetime.datetime.now() - start_time), "passed")
