@@ -197,7 +197,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
             'SSN_ID': ssn_id.between(minimum=1000000000000000, maximum=10000000000000000 - 1),
             'telephone': ssn_id.between(minimum=89000000000, maximum=89999999999),
             'home_address': home_addr.address(),
-            'coordinates': r.point(normalvariate(origin[0], 0.1), normalvariate(origin[1], 0.05)),
+            'coordinates': r.point(normalvariate(origin[0], 0.025), normalvariate(origin[1], 0.025)),
             'illness_history_head_id': i,
             'additional_data': {}
         }).run(conn)
@@ -271,7 +271,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
             'driver_id': 'wanted',
             'doctor_id': 'wanted',
             'paramedic_ids': ['wanted'],
-            'coordinates': r.point(normalvariate(origin[0], 0.1), normalvariate(origin[1], 0.05)),
+            'coordinates': r.point(normalvariate(origin[0], 0.025), normalvariate(origin[1], 0.025)),
             'available': "y",
             'additional_data': {}
         }).run(conn)
