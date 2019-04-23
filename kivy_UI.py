@@ -13,13 +13,10 @@ from kivy.uix.spinner import Spinner
 from kivy.uix.textinput import TextInput
 
 # Builder can be used to markup all widgets
-# from kivy.lang import Builder
+from kivy.lang import Builder
 
 # check kivy-version is correct
 kivy.require('1.10.1')
-
-
-# TODO: finish GET ops via filtering the data
 
 
 class MainActivity(App):
@@ -85,14 +82,16 @@ class MainActivity(App):
     # Checks if values have correct types. Doesn't fix incorrect values.
     # suspected_data: dictionary of pairs (index as field name, value of field)
     def validate_data(self, suspected_data: dict):
+        print(suspected_data)
         if self.spinner_crud.text == "Add":
             for entry in suspected_data:
+                if str(entry) == "additional_data":
+                    continue
+
                 # if key reflects list of ids, value should be a list of ints
                 if str(entry).find("_ids") != -1:
-                    # check if it's a list
-                    if type(suspected_data[entry]) != list:
-                        print(suspected_data[entry], "is not a list.")
-                        return False
+                    # cast it to list
+                    suspected_data[entry] = str(suspected_data[entry]).split(" ")
                     # check it contains integers only
                     for k in range(len(suspected_data[entry])):
                         try:
@@ -100,17 +99,20 @@ class MainActivity(App):
                         except ValueError:
                             print(str(suspected_data[entry][k]), "is not an integer. Check rest List members.")
                             return False
-
                 # if key is an identifier, value should be integer only
-                if str(entry).find("_id") != -1:
-                    if type(suspected_data[entry]) != int:
-                        print(str(suspected_data[entry], "is not an integer"))
+                elif str(entry).find("_id") != -1:
+                    try:
+                        suspected_data[entry] = int(suspected_data[entry])
+                    except ValueError:
+                        print(str(suspected_data[entry]), entry, "is not an integer")
                         return False
 
                 # and now rest params that can fail the data system
-                if str(entry).find("_amount") == -1:
-                    if type(suspected_data[entry]) != int:
-                        print(str(suspected_data[entry], "is not an integer"))
+                if str(entry).find("_amount") != -1:
+                    try:
+                        suspected_data[entry] = int(suspected_data[entry])
+                    except ValueError:
+                        print(str(suspected_data[entry]), entry, "is not an integer")
                         return False
 
                 if str(entry) == "SSN_ID":
@@ -134,24 +136,25 @@ class MainActivity(App):
                             return False
 
                 if str(entry) == "coordinates":
-                    if len(suspected_data[entry] != 2):
+                    buf = str(suspected_data[entry]).split(" ")
+                    if len(buf) != 2:
                         print("coordinates should be 2 numbers")
                         return False
                     try:
-                        latitude = float(suspected_data[entry][0])
-                        longtitude = float(suspected_data[entry][1])
+                        latitude = float(buf[0])
+                        longitude = float(buf[1])
                         if abs(latitude) > 90:
                             print("abs(latitude) shouldn't exceed 90 degrees")
                             return False
-                        if abs(longtitude) > 180:
-                            print("abs(longtitude) shouldn't exceed 180 degrees")
+                        if abs(longitude) > 180:
+                            print("abs(longitude) shouldn't exceed 180 degrees")
                             return False
                     except ValueError:
                         print("coordinates should be Numbers")
                         return False
 
                 if str(entry) == "sex":
-                    if str(suspected_data[entry]) not in ['male', 'female']:
+                    if str(suspected_data[entry]) not in ['male', 'female', "Male", "Female", "M", "F"]:
                         print(str(suspected_data[entry]), "is not a gender!")
                         return False
 
@@ -169,89 +172,85 @@ class MainActivity(App):
             for entry in suspected_data:
                 # cut all empty values
                 if suspected_data[entry] != "":
-                    # we'll filter by one value OR between two values
-                    buffer_entry = str(suspected_data[entry]).split(' ')
-                    for c in range(len(buffer_entry)):
-                        # if key reflects list of ids, value should be a list of ints
-                        if str(buffer_entry[c]).find("_ids") != -1:
-                            # check if it's a list
-                            if type(suspected_data[buffer_entry[c]]) != list:
-                                print(suspected_data[buffer_entry[c]], "is not a list.")
+                    # if key reflects list of ids, value should be a list of ints
+                    if str(entry).find("_ids") != -1:
+                        # cast it to list
+                        suspected_data[entry] = str(suspected_data[entry]).split(" ")
+                        # check it contains integers only
+                        for k in range(len(suspected_data[entry])):
+                            try:
+                                suspected_data[entry][k] = int(suspected_data[entry][k])
+                            except ValueError:
+                                print(str(suspected_data[entry][k]), "is not an integer. Check rest List members.")
                                 return False
-                            # check it contains integers only
-                            for k in range(len(suspected_data[buffer_entry[c]])):
-                                try:
-                                    suspected_data[buffer_entry[c]][k] = int(suspected_data[buffer_entry[c]][k])
-                                except ValueError:
-                                    print(str(suspected_data[buffer_entry[c]][k]),
-                                          "is not an integer. Check rest List members.")
-                                    return False
+                    # if key is an identifier, value should be integer only
+                    elif str(entry).find("_id") != -1:
+                        try:
+                            suspected_data[entry] = int(suspected_data[entry])
+                        except ValueError:
+                            print(str(suspected_data[entry]), entry, "is not an integer")
+                            return False
 
-                        # if key is an identifier, value should be integer only
-                        if str(buffer_entry[c]).find("_id") != -1:
-                            if type(suspected_data[buffer_entry[c]]) != int:
-                                print(str(suspected_data[buffer_entry[c]], "is not an integer"))
-                                return False
+                    # and now rest params that can fail the data system
+                    if str(entry).find("_amount") != -1:
+                        try:
+                            suspected_data[entry] = int(suspected_data[entry])
+                        except ValueError:
+                            print(str(suspected_data[entry]), entry, "is not an integer")
+                            return False
 
-                        # and now rest params that can fail the data system
-                        if str(buffer_entry[c]).find("_amount") == -1:
-                            if type(suspected_data[buffer_entry[c]]) != int:
-                                print(str(suspected_data[buffer_entry[c]], "is not an integer"))
-                                return False
+                    if str(entry) == "SSN_ID":
+                        if not str(suspected_data[entry]).isnumeric() and len(str(suspected_data[entry])) != 16:
+                            print("SSN_ID should be 16-digit number.")
+                            return False
 
-                        if str(buffer_entry[c]) == "SSN_ID":
-                            if not str(suspected_data[buffer_entry[c]]).isnumeric() and len(
-                                    str(suspected_data[buffer_entry[c]])) != 16:
-                                print("SSN_ID should be 16-digit number.")
-                                return False
+                    if str(entry) == "telephone":
+                        if not str(suspected_data[entry]).isnumeric() and len(str(suspected_data[entry])) != 11:
+                            print("telephone should 11-digit number, starting from 8")
+                            return False
 
-                        if str(buffer_entry[c]) == "telephone":
-                            if not str(suspected_data[buffer_entry[c]]).isnumeric() and len(
-                                    str(suspected_data[buffer_entry[c]])) != 11:
-                                print("telephone should 11-digit number, starting from 8")
-                                return False
-
-                        if str(buffer_entry[c]) == "date_of_birth":
-                            buf = str(suspected_data[buffer_entry[c]]).split("-")
-                            if len(buf) != 3:
+                    if str(entry) == "date_of_birth":
+                        buf = str(suspected_data[entry]).split("-")
+                        if len(buf) != 3:
+                            print("Date of birth should be in format <dd-mm-yyyy>")
+                            return False
+                        for num in buf:
+                            if not str(num).isnumeric():
                                 print("Date of birth should be in format <dd-mm-yyyy>")
                                 return False
-                            for num in buf:
-                                if not str(num).isnumeric():
-                                    print("Date of birth should be in format <dd-mm-yyyy>")
-                                    return False
 
-                        if str(buffer_entry[c]) == "coordinates":
-                            if len(suspected_data[buffer_entry[c]] != 2):
-                                print("coordinates should be 2 numbers")
+                    if str(entry) == "coordinates":
+                        buf = str(suspected_data[entry]).split(" ")
+                        if len(buf) != 2:
+                            print("coordinates should be 2 numbers")
+                            return False
+                        try:
+                            latitude = float(buf[0])
+                            longitude = float(buf[1])
+                            if abs(latitude) > 90:
+                                print("abs(latitude) shouldn't exceed 90 degrees")
                                 return False
-                            try:
-                                latitude = float(suspected_data[buffer_entry[c]][0])
-                                longtitude = float(suspected_data[buffer_entry[c]][1])
-                                if abs(latitude) > 90:
-                                    print("abs(latitude) shouldn't exceed 90 degrees")
-                                    return False
-                                if abs(longtitude) > 180:
-                                    print("abs(longtitude) shouldn't exceed 180 degrees")
-                                    return False
-                            except ValueError:
-                                print("coordinates should be Numbers")
+                            if abs(longitude) > 180:
+                                print("abs(longitude) shouldn't exceed 180 degrees")
                                 return False
+                        except ValueError:
+                            print("coordinates should be Numbers")
+                            return False
 
-                        if str(buffer_entry[c]) == "sex":
-                            if str(suspected_data[buffer_entry[c]]) not in ['male', 'female']:
-                                print(str(suspected_data[buffer_entry[c]]), "is not a gender!")
-                                return False
+                    if str(entry) == "sex":
+                        if str(suspected_data[entry]) not in ['male', 'female', "Male", "Female", "M", "F"]:
+                            print(str(suspected_data[entry]), "is not a gender!")
+                            return False
 
-                        if str(buffer_entry[c]) == "salary":
-                            try:
-                                m_salary = float(str(suspected_data[buffer_entry[c]]))
-                                if m_salary < 0.0:
-                                    print("Who pays negative salary?")
-                                    return False
-                            except ValueError:
-                                print("salary should be a Number")
+                    if str(entry) == "salary":
+                        try:
+                            m_salary = float(str(suspected_data[entry]))
+                            if m_salary < 0.0:
+                                print("Who pays negative salary?")
                                 return False
+                        except ValueError:
+                            print("salary should be a Number")
+                            return False
 
         return True
 
@@ -259,7 +258,7 @@ class MainActivity(App):
     def confirm_operation(self, instance):
         # Part 0 - form basis for ReQL command. Get all values from TextInputs. Validate these values.
         cmd = self.rdb.db('HMS')
-        read_values = [self.list_of_text_inputs[i].text for i in range(0, 9)]
+        read_values = [self.list_of_text_inputs[i].text for i in range(0, len(self.list_of_text_inputs) - 1)]
 
         # Part 1 - choose, what table to work with
         cur_table = self.tables[list(self.tables).index(str(self.spinner_table.text))]
@@ -267,34 +266,73 @@ class MainActivity(App):
         cmd = cmd.table(cur_table)
         res = str(cmd)
 
-        # Part 2 - choose, what operation to execute, with part 3 - run formed command
+        # Part 2 - choose, what operation to execute,
+        # with part 3 - run formed command
+        # and part 4 - show result
         cur_cmd = self.spinner_crud.text
         if cur_cmd == self.spinner_crud.values[0]:
-            # Add ~ insert
+            # Add ~ insert. Then, first of all, get new primary key value
+            counter = self.rdb.db("HMS").table(self.spinner_table.text).count().run(self.conn)
             insert_data = dict(zip(fields_of_cur_table, read_values[0:len(fields_of_cur_table)]))
+            insert_data["primary_id"] = counter + 1
+            # Validate everything
             if not self.validate_data(insert_data):
                 self.list_of_text_inputs[len(self.list_of_text_inputs) - 1].text = "Incorrect input data!"
                 return 0
+            # and execute command
             cmd = cmd.insert(insert_data)
             res = cmd.run(self.conn)
+            # show result
+            print("INSERT:", cmd)
+            print("RES:", res)
+            self.list_of_text_inputs[len(self.list_of_text_inputs) - 1].text = str(res)
+
         elif cur_cmd == self.spinner_crud.values[1]:
             # Change ~ update. Not used
             res = "Not realized"
-        elif cur_cmd == self.spinner_crud.values[3]:
-            # Remove ~ delete
-            remove_data = dict(zip(fields_of_cur_table, read_values[0:len(fields_of_cur_table)]))
+        elif cur_cmd == self.spinner_crud.values[2]:
+            # Remove ~ delete. Collect all data
+            init_data = dict(zip(fields_of_cur_table, read_values[0:len(fields_of_cur_table)]))
+            remove_data = dict()
+            # drop empty fields
+            for entry in init_data:
+                if init_data[entry] != "":
+                    remove_data[entry] = init_data[entry]
+            init_data.clear()
+            # validate data
             if not self.validate_data(remove_data):
-                res = cmd.run(self.conn)
+                self.list_of_text_inputs[len(self.list_of_text_inputs) - 1].text = "Incorrect input data!"
+                return 0
+            # execute
+            cmd = cmd.filter(remove_data)
+            cmd = cmd.delete()
+            res = cmd.run(self.conn)
+            # show result
             print("DELETE:", cmd)
+            print("RES:", res)
+            self.list_of_text_inputs[len(self.list_of_text_inputs) - 1].text = str(res)  # cmd
+
         else:
             # Print ~ get
-            # get_data = dict(zip(fields_of_cur_table, read_values[0:len(fields_of_cur_table)]))
-            # self.validate_data(get_data)
-            # res = cmd.run(self.conn)
+            # collect all data
+            init_data = dict(zip(fields_of_cur_table, read_values[0:len(fields_of_cur_table)]))
+            # drop empty fields
+            get_data = dict()
+            for entry in init_data:
+                if init_data[entry] != "":
+                    get_data[entry] = init_data[entry]
+            init_data.clear()
+            # validate rest params
+            if not self.validate_data(get_data):
+                self.list_of_text_inputs[len(self.list_of_text_inputs) - 1].text = "Incorrect input data!"
+                return 0
+            # execute command
+            cmd = cmd.filter(get_data)
+            res = cmd.run(self.conn)
+            # show result
             print("GET:", cmd)
-
-        # Part 4 - put the result in result text_input
-        self.list_of_text_inputs[len(self.list_of_text_inputs) - 1].text = str(res)  # cmd
+            print("RES:", res)
+            self.list_of_text_inputs[len(self.list_of_text_inputs) - 1].text = str(list(res))
 
         return 0
 
@@ -312,9 +350,14 @@ class MainActivity(App):
                                      size=(50, 20))
         self.spinner_table.bind(text=self.set_hint_values)
 
-        # Also we'll need 9 text fields, whose value depends on Table_Selector.value, plus result shower
-        self.list_of_text_inputs = [TextInput(hint_text=str(i + 1), multiline=False) for i in range(0, 9)]
-        self.list_of_text_inputs.append(TextInput(hint_text='Result'))
+        # Also we'll need 10 text fields, whose value depends on Table_Selector.value, plus result shower
+        self.list_of_text_inputs = [TextInput(hint_text=str(i + 1), multiline=False) for i in range(0, 10)]
+        self.list_of_text_inputs.append(
+            Builder.load_string("""TextInput:
+                hint_text: "Result"
+                width: 100
+                width: self.width""")
+        )
 
         # and, finally, confirming Button
         self.btn_action = Button(text='Confirm')
