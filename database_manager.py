@@ -212,7 +212,7 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
                 }
             }).run(conn)
         if i % 128 == 0:
-            print('Forms inserted:', float(100 * i / (3*total_patients_amount)), '%',
+            print('Forms inserted:', float(100 * i / (total_patients_amount)), '%',
                   str(datetime.datetime.now() - start_time), "passed")
 
     # Hospital generator
@@ -255,9 +255,9 @@ def generate_sample_data(total_employees_amount: int, total_patients_amount: int
     print('Ambulances table ready', str(datetime.datetime.now() - start_time), "passed")
 
     # in the end, add geometry support
-    r.db("HMS").table("Patients").index_create("coordinates", geo=True)
-    r.db("HMS").table("Ambulances").index_create("coordinates", geo=True)
-    r.db("HMS").table("Hospital").index_create("coordinates", geo=True)
+    r.db("HMS").table("Patients").index_create("coordinates", geo=True).run(conn)
+    r.db("HMS").table("Ambulances").index_create("coordinates", geo=True).run(conn)
+    r.db("HMS").table("Hospital").index_create("coordinates", geo=True).run(conn)
 
     return 0
 
