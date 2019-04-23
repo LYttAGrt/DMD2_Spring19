@@ -61,6 +61,10 @@ class MainActivity(App):
                 self.list_of_text_inputs[i].hint_text = "Type filterable value of candidate's " + str(indices[i])
                 self.list_of_text_inputs[i].disabled = False
                 self.list_of_text_inputs[i].text = ""
+                if indices[i] == 'password':
+                    self.list_of_text_inputs[i].hint_text = "Not shown"
+                    self.list_of_text_inputs[i].disabled = True
+                    self.list_of_text_inputs[i].text = ""
             for i in range(len(indices), len(self.list_of_text_inputs) - 1):
                 self.list_of_text_inputs[i].hint_text = "Not used"
                 self.list_of_text_inputs[i].disabled = True
@@ -72,6 +76,10 @@ class MainActivity(App):
                 self.list_of_text_inputs[i].hint_text = "Type filterable value of candidate's " + str(indices[i])
                 self.list_of_text_inputs[i].disabled = False
                 self.list_of_text_inputs[i].text = ""
+                if indices[i] == 'password':
+                    self.list_of_text_inputs[i].hint_text = "Not shown"
+                    self.list_of_text_inputs[i].disabled = True
+                    self.list_of_text_inputs[i].text = ""
             for i in range(len(indices), len(self.list_of_text_inputs) - 1):
                 self.list_of_text_inputs[i].hint_text = "Not used"
                 self.list_of_text_inputs[i].disabled = True
@@ -350,8 +358,8 @@ class MainActivity(App):
                                      size=(50, 20))
         self.spinner_table.bind(text=self.set_hint_values)
 
-        # Also we'll need 10 text fields, whose value depends on Table_Selector.value, plus result shower
-        self.list_of_text_inputs = [TextInput(hint_text=str(i + 1), multiline=False) for i in range(0, 10)]
+        # Also we'll need 12 text fields, whose value depends on Table_Selector.value, plus result shower
+        self.list_of_text_inputs = [TextInput(hint_text=str(i + 1), multiline=False) for i in range(0, 12)]
         self.list_of_text_inputs.append(
             Builder.load_string("""TextInput:
                 hint_text: "Result"
