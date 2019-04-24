@@ -36,7 +36,7 @@ coords = patient["coordinates"]["coordinates"]
 patient_point = r.point(coords[0], coords[1])
 pprint(r.db("HMS").table("Ambulances").get_nearest(patient_point, index='coordinates', max_results=2, unit='km').run(conn))
 
-colors.Color.from_rgb()
+# colors.Color.from_rgb()
 
 #INSERT ONE ENTRY
 r.db("HMS").table("Ambulances").insert({
@@ -71,7 +71,7 @@ r.db("HMS").table("Patients").insert({
     'coordinates': r.point(55.43423, 47.76545),
     'illness_history_head_id': illness_history_id,
     'additional_data': {"problem patient"}
-}).run(conn)
+}, return_changes=True).run(conn)
 pprint(r.db("HMS").table("Patients").filter({'name': 'John Terry'}).run(conn))
 
 
@@ -85,7 +85,7 @@ r.db("HMS").table("IllnessHistories").insert({
 pprint(r.db("HMS").table("IllnessHistories").filter({'owner_id': patient_id}).run(conn))
 
 
-r.db("HMS").table('IllnessForms').insert({
+r.db("HMS").table('IllnessForms').insert([{
                 'primary_id': form_id_1,
                 'form_type': "069-uf",
                 'doctor_id': doctor_id,
@@ -106,7 +106,6 @@ r.db("HMS").table('IllnessForms').insert({
                     'operation_type': 'operation on left arm',
                     'result': 'success'
                 }
-            }
-
+            }]
 ).run(conn)
 pprint(r.db("HMS").table("IllnessForms").filter({'patient_id' : patient_id}).run(conn))
