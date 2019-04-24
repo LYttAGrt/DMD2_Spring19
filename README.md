@@ -6,11 +6,12 @@ HMS, the DMD course project
 To use it, install the following packets: 
 * RebirthDB (e.g, from https://github.com/floydkots/rebirthdb)
 
-and following Python 3 libraries:
+and following Python3 libraries:
 * Cython=0.25.2 (http://docs.cython.org/en/latest/src/quickstart/install.html)
 * Kivy=1.10.1 (https://kivy.org/#download)
 * mimesis=3.1.0
 * rethinkdb=2.4.1
+* ...
 
 Then, run your localhost:
 
