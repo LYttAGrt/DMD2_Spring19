@@ -23,7 +23,6 @@ conn = r.connect(db="HMS")
 #         distances.append([element["primary_id"], distance])
 #     distances.sort(key=lambda unit: unit[0])
 #     return distances[:n]
-
 #res_list = get_nearest(patient, list(ambulances), 1)
 #print(res_list)
 
@@ -31,26 +30,31 @@ conn = r.connect(db="HMS")
 
 patients_amount = r.db("HMS").table("Patients").count().run(conn)
 patient = r.db("HMS").table("Patients").get(randint(0, patients_amount)).run(conn)
-pprint(patient)
+# pprint(patient)
 coords = patient["coordinates"]["coordinates"]
 patient_point = r.point(coords[0], coords[1])
-pprint(r.db("HMS").table("Ambulances").get_nearest(patient_point, index='coordinates', max_results=2, unit='km').run(conn))
+# pprint(r.db("HMS").table("Ambulances").get_nearest(patient_point, index='coordinates', max_results=2, unit='km').run(conn))
 
 # colors.Color.from_rgb()
 
-#INSERT ONE ENTRY
+
+# INSERT ONE ENTRY
+feed = r.db("HMS").table("Ambulances").changes().run(conn)
+for change in feed:
+    pprint(change)
 r.db("HMS").table("Ambulances").insert({
     'primary_id': 77,
     'driver_id': 50,
     'doctor_id': 36,
     'paramedic_ids': [55, 73, 125],
     'coordinates': r.point(55.752258, 48.744576),
-    'additional_data': {"the fastest ambulance in hospital"}
+    'additional_data': {'vehicle': 'Gazel',
+                        'production year': 1992,
+                        'driver license': 7777123456}
         }).run(conn)
-pprint(r.db("HMS").table("Ambulances").run(conn))
 
 
-#INSERT MULTIPLE ENTRIES
+# INSERT MULTIPLE ENTRIES
 patient_id = 10000
 illness_history_id = 10001
 form_id_1 = 10002
@@ -72,7 +76,7 @@ r.db("HMS").table("Patients").insert({
     'illness_history_head_id': illness_history_id,
     'additional_data': {"problem patient"}
 }, return_changes=True).run(conn)
-pprint(r.db("HMS").table("Patients").filter({'name': 'John Terry'}).run(conn))
+# pprint(r.db("HMS").table("Patients").filter({'name': 'John Terry'}).run(conn))
 
 
 r.db("HMS").table("IllnessHistories").insert({
@@ -82,9 +86,18 @@ r.db("HMS").table("IllnessHistories").insert({
             'next_id': '',
             'additional_data': {"history of problem patient"}
         }).run(conn)
-pprint(r.db("HMS").table("IllnessHistories").filter({'owner_id': patient_id}).run(conn))
+# pprint(r.db("HMS").table("IllnessHistories").filter({'owner_id': patient_id}).run(conn))
 
-
+pprint(r.db("HMS").table("Departments").filter({'primary_id': 1}).run(conn))
+r.db("HMS").table("Departments").filter({'primary_id': 1}).update({'additional_data':
+                                                                {'syringes': 2000,  'medicaments': {
+                                                                                    'insulin': 100,
+                                                                                    'ascorbate': 300,
+                                                                                    'cardiomagnyl': 250,
+                                                                                     }
+                                                                }
+                                                                }).run(conn)
+pprint(r.db("HMS").table("Departments").filter({'primary_id': 1}).run(conn))
 r.db("HMS").table('IllnessForms').insert([{
                 'primary_id': form_id_1,
                 'form_type': "069-uf",
@@ -108,4 +121,4 @@ r.db("HMS").table('IllnessForms').insert([{
                 }
             }]
 ).run(conn)
-pprint(r.db("HMS").table("IllnessForms").filter({'patient_id' : patient_id}).run(conn))
+# pprint(r.db("HMS").table("IllnessForms").filter({'patient_id' : patient_id}).run(conn))
