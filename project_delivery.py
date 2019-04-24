@@ -92,20 +92,21 @@ r.db("HMS").table('IllnessForms').insert({
                 'patient_id': patient_id,
                 'procedure_type': "bandaging",
                 'additional_data': {
-                    'operation_type': 'operation on arm',
+                    'operation_type': 'operation on right arm',
                     'result': 'success'
                 }
-            }).run(conn)
-
-r.db("HMS").table('IllnessForms').insert({
+            },
+            {
                 'primary_id': form_id_2,
                 'form_type': "183-op",
                 'doctor_id': doctor_id + 1,
                 'patient_id': patient_id,
                 'procedure_type': "electrodiagnostics",
                 'additional_data': {
-                    'operation_type': 'operation on arm',
+                    'operation_type': 'operation on left arm',
                     'result': 'success'
                 }
-            }).run(conn)
+            }
+
+).run(conn)
 pprint(r.db("HMS").table("IllnessForms").filter({'patient_id' : patient_id}).run(conn))
